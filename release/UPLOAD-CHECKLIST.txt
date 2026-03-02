@@ -1,0 +1,24 @@
+﻿WOMIO RELEASE CHECKLIST
+
+1) WEB:
+   Upload release/web/* to: /var/www/womio/web
+
+2) BACKEND:
+   Upload release/backend/* to: /var/www/womio/backend
+   Then run:
+   cd /var/www/womio/backend
+   npm ci --omit=dev
+   cp .env.production.example .env
+   # fill real env values
+
+3) SQL:
+   Run file:
+   /var/www/womio/backend/sql/001_womio_core_mysql.sql
+
+4) NGINX:
+   Use:
+   release/deploy/nginx/womio.net.conf
+
+5) SYSTEMD:
+   Use:
+   release/deploy/systemd/womio-backend.service

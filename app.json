@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "womio",
+    "slug": "womio",
+    "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "scheme": "womio",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "net.womio.app",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMotionUsageDescription": "WOMIO adim sayar ozelligi icin hareket verisine erisim ister.",
+        "NSPhotoLibraryUsageDescription": "WOMIO profil ve modul iceriklerine fotograf eklemek icin galeri erisimi ister.",
+        "NSCameraUsageDescription": "WOMIO kahve fali ve profil ozellikleri icin kamera erisimi ister."
+      }
+    },
+    "android": {
+      "package": "net.womio.app",
+      "versionCode": 1,
+      "permissions": ["ACTIVITY_RECOGNITION", "CAMERA", "READ_MEDIA_IMAGES"],
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/logo.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=net.womio.app"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/logo.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      "expo-image-picker"
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/REPLACE_WITH_EAS_PROJECT_ID"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      },
+      "websiteUrl": "https://womio.net"
+    },
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

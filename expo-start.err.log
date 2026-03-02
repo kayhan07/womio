@@ -1,0 +1,3 @@
+  --non-interactive is not supported, use $CI=1 instead
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.

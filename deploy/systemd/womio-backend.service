@@ -1,0 +1,16 @@
+[Unit]
+Description=WOMIO Backend API
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/womio/backend
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/womio/backend/.env
+ExecStart=/usr/bin/node /var/www/womio/backend/server.js
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

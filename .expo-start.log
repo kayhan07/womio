@@ -1,0 +1,435 @@
+env: load .env
+env: export EXPO_PUBLIC_SHOPPING_YANDEX_PROXY EXPO_PUBLIC_SHOPPING_AFFILIATE_PROXY
+Starting project at C:\Users\Kayhan\Desktop\womio
+React Compiler enabled
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓░░░░░░░░░░░ 32.7% (14/40)
+λ node_modules\expo-router\node\render.js ░░░░░░░░░░░░░░░░  5.5% ( 13/124)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓░░░░░░░░░░░ 32.7% (18/99)
+λ node_modules\expo-router\node\render.js ▓░░░░░░░░░░░░░░░  7.2% ( 65/243)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓░░░░░░░░░░░ 32.7% ( 90/184)
+λ node_modules\expo-router\node\render.js ▓▓▓░░░░░░░░░░░░░ 21.5% (172/371)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓░░░░░░░░░░░ 32.7% ( 99/188)
+λ node_modules\expo-router\node\render.js ▓▓▓▓░░░░░░░░░░░░ 25.8% (215/423)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓░░░░░░░░░░░ 32.7% (120/212)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓░░░░░░░░░ 44.1% (342/515)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.2% (201/362)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 56.6% (442/753)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.2% (267/407)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 56.6% (520/816)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.2% (319/484)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 59.3% (674/875)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.2% (338/503)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 62.7% (693/875)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.2% (342/509)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 62.7% (693/875)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.2% (353/520)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 69.4% (762/947)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 63.0% (465/590)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 72.5% ( 870/1022)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% (587/860)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 82.2% (1021/1126)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 75.2% (841/970)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 85.1% (1119/1247)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 84.2% (1039/1160)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 90.0% (1309/1380)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 85.5% (1224/1357)
+λ node_modules\expo-router\node\render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.6% (1444/1454)
+λ Bundled 58552ms node_modules\expo-router\node\render.js (1456 modules)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  Image: style.resizeMode is deprecated. Please use props.resizeMode. 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  extractNonStandardStyleProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\Image\index.js:59:13)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\Image\index.js:181:31)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+  renderNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:6306:18)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.3% (1484/1497)
+Web Bundled 64762ms node_modules\expo-router\entry.js (1504 modules)
+Web node_modules\expo-router\entry.js ▓▓▓▓░░░░░░░░░░░░ 26.6% (144/311)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓░░░░░░░░░░░ 34.4% (264/451)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓░░░░░░░░░░░ 37.0% (281/462)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓░░░░░░░░░░ 42.3% (329/506)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 55.9% (534/714)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 81.7% (809/895)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 84.3% (1097/1236)
+Web node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 94.4% (1439/1481)
+Web Bundled 27399ms node_modules\expo-router\entry.js (1506 modules)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 361ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  Image: style.resizeMode is deprecated. Please use props.resizeMode. 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  extractNonStandardStyleProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\Image\index.js:59:13)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\Image\index.js:181:31)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+  renderNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:6306:18)
+Web Bundled 2849ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 128ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 609ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web Bundled 2871ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 186ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 598ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 3135ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 156ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 357ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 3184ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 107ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 808ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 5157ms node_modules\expo-router\entry.js (1 module)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 155ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 101ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 1809ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 133ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 621ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 3381ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 129ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 114ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 2119ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 109ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 1981ms node_modules\expo-router\node\render.js (1 module)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 8219ms node_modules\expo-router\entry.js (1 module)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 210ms node_modules\expo-router\entry.js (1 module)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 122ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 2264ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 122ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 726ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 3067ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 108ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 2305ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 4035ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 111ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 1143ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+  console.warn (C:\Users\Kayhan\Desktop\womio\node_modules\expo\node_modules\@expo\cli\src\start\server\serverLogLikeMetro.ts:161:21)
+  warnOnce (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\warnOnce\index.js:24:13)
+  createDOMProps (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\modules\createDOMProps\index.js:805:13)
+  createElement (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\createElement\index.js:23:32)
+  Component (C:\Users\Kayhan\Desktop\womio\node_modules\react-native-web\dist\exports\View\index.js:111:23)
+  Object.callComponentInDEV [as react-stack-bottom-frame] (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:8970:18)
+  renderWithHooks (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:4699:19)
+  run (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5539:39)
+  retryNode (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5899:31)
+  renderNodeDestructive (C:\Users\Kayhan\Desktop\womio\node_modules\react-dom\cjs\react-dom-server-legacy.node.development.js:5849:11)
+Web Bundled 3224ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 510ms node_modules\expo-router\entry.js (1 module)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+ LOG  [web] Logs will appear in the browser console
+ ERROR  SyntaxError: C:\Users\Kayhan\Desktop\womio\app\(tabs)\home.tsx: Unexpected token (194:16)
+
+  192 |     ...StyleSheet.absoluteFillObject,
+  193 |   },
+> 194 |   heroBgImage: {`r`n    opacity: 0,
+      |                 ^
+  195 |   },
+  196 |   heroBgOverlay: {
+  197 |     ...StyleSheet.absoluteFillObject,
+    at constructor (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:365:19)
+    at TypeScriptParserMixin.raise (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:6599:19)
+    at TypeScriptParserMixin.unexpected (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:6619:16)
+    at TypeScriptParserMixin.parsePropertyName (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12024:18)
+    at TypeScriptParserMixin.parsePropertyDefinition (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11889:10)
+    at TypeScriptParserMixin.parseObjectLike (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11832:21)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11339:23)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:4764:20)
+    at TypeScriptParserMixin.parseExprSubscripts (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11081:23)
+    at TypeScriptParserMixin.parseUpdate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10881:23)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10831:21)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9786:20)
+    at C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10800:39
+    at TypeScriptParserMixin.allowInAnd (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12426:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10800:17)
+    at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12493:17)
+    at TypeScriptParserMixin.parseObjectProperty (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11950:83)
+    at TypeScriptParserMixin.parseObjPropValue (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11978:100)
+    at TypeScriptParserMixin.parseObjPropValue (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9744:18)
+    at TypeScriptParserMixin.parsePropertyDefinition (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11915:17)
+    at TypeScriptParserMixin.parseObjectLike (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11832:21)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11339:23)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:4764:20)
+    at TypeScriptParserMixin.parseExprSubscripts (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11081:23)
+    at TypeScriptParserMixin.parseUpdate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10881:23)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10831:21)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9786:20)
+    at C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10800:39
+    at TypeScriptParserMixin.allowInAnd (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12426:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10800:17)
+    at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12493:17)
+    at TypeScriptParserMixin.parseExprListItem (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12175:18)
+    at TypeScriptParserMixin.parseCallExpressionArguments (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11252:22)
+    at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11186:29)
+    at TypeScriptParserMixin.parseSubscript (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11120:19)
+    at TypeScriptParserMixin.parseSubscript (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9272:18)
+    at TypeScriptParserMixin.parseSubscripts (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11094:19)
+    at TypeScriptParserMixin.parseExprSubscripts (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11085:17)
+    at TypeScriptParserMixin.parseUpdate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11046:23)
+ ERROR  SyntaxError: C:\Users\Kayhan\Desktop\womio\app\(tabs)\health.tsx: Unexpected token (4493:19)
+
+  4491 |     ...StyleSheet.absoluteFillObject,
+  4492 |   },
+> 4493 |   heroImageInner: {`r`n    borderRadius: 16,`r`n    opacity: 0,
+       |                    ^
+  4494 |   },
+  4495 |   heroOverlayStrong: {
+  4496 |     ...StyleSheet.absoluteFillObject,
+    at constructor (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:365:19)
+    at TypeScriptParserMixin.raise (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:6599:19)
+    at TypeScriptParserMixin.unexpected (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:6619:16)
+    at TypeScriptParserMixin.parsePropertyName (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12024:18)
+    at TypeScriptParserMixin.parsePropertyDefinition (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11889:10)
+    at TypeScriptParserMixin.parseObjectLike (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11832:21)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11339:23)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:4764:20)
+    at TypeScriptParserMixin.parseExprSubscripts (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11081:23)
+    at TypeScriptParserMixin.parseUpdate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10881:23)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10831:21)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9786:20)
+    at C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10800:39
+    at TypeScriptParserMixin.allowInAnd (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12426:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10800:17)
+    at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12493:17)
+    at TypeScriptParserMixin.parseObjectProperty (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11950:83)
+    at TypeScriptParserMixin.parseObjPropValue (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11978:100)
+    at TypeScriptParserMixin.parseObjPropValue (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9744:18)
+    at TypeScriptParserMixin.parsePropertyDefinition (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11915:17)
+    at TypeScriptParserMixin.parseObjectLike (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11832:21)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11339:23)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:4764:20)
+    at TypeScriptParserMixin.parseExprSubscripts (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11081:23)
+    at TypeScriptParserMixin.parseUpdate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11046:23)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9837:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10899:61)
+    at TypeScriptParserMixin.parseExprOps (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10904:23)
+    at TypeScriptParserMixin.parseMaybeConditional (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10881:23)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10831:21)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9786:20)
+    at C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10800:39
+    at TypeScriptParserMixin.allowInAnd (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12426:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:10800:17)
+    at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12493:17)
+    at TypeScriptParserMixin.parseExprListItem (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:12175:18)
+    at TypeScriptParserMixin.parseCallExpressionArguments (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11252:22)
+    at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11186:29)
+    at TypeScriptParserMixin.parseSubscript (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11120:19)
+    at TypeScriptParserMixin.parseSubscript (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:9272:18)
+    at TypeScriptParserMixin.parseSubscripts (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11094:19)
+    at TypeScriptParserMixin.parseExprSubscripts (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11085:17)
+    at TypeScriptParserMixin.parseUpdate (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11066:21)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\Kayhan\Desktop\womio\node_modules\@babel\parser\lib\index.js:11046:23)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ node_modules\expo-router\node\render.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 17461ms node_modules\expo-router\node\render.js (1 module)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ node_modules\expo-router\node\render.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web Bundled 23311ms node_modules\expo-router\entry.js (1 module)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 4874ms node_modules\expo-router\entry.js (1 module)
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 121ms node_modules\expo-router\node\render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web Bundled 2726ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 165ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
