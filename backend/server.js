@@ -168,7 +168,7 @@ app.post("/auth/login", async (req, res) => {
        left join user_roles ur on ur.user_id = u.id
        left join roles r on r.id = ur.role_id
        where u.email = ?
-       group by u.id, u.email, u.username, u.birth_date, u.password_hash, u.blocked_until`,
+       group by u.id`,
       [email]
     )
 
@@ -212,7 +212,7 @@ app.get("/auth/me", requireAuth, async (req, res) => {
        left join user_roles ur on ur.user_id = u.id
        left join roles r on r.id = ur.role_id
        where u.id = ?
-       group by u.id, u.email, u.username, u.birth_date`,
+       group by u.id`,
       [userId]
     )
     if (result.length < 1) return res.status(404).json({ error: "user not found" })
@@ -224,53 +224,6 @@ app.get("/auth/me", requireAuth, async (req, res) => {
   } catch (error) {
     console.error("Auth me error:", error?.message ?? error)
     return res.status(500).json({ error: "me failed" })
-  }
-})
-
-app.get("/admin/members", requireAuth, async (req, res) => {
-  if (!isAuthEnabled()) {
-    return res.status(503).json({ error: "auth service is not configured" })
-  }
-
-  try {
-    const result = await dbQuery(
-      `select u.id,
-              u.email,
-              u.username,
-              u.birth_date,
-              u.status,
-              u.blocked_until,
-              u.created_at,
-              group_concat(distinct r.code separator ',') as role_ids_csv
-       from app_users u
-       left join user_roles ur on ur.user_id = u.id
-       left join roles r on r.id = ur.role_id
-       group by u.id, u.email, u.username, u.birth_date, u.status, u.blocked_until, u.created_at
-       order by u.created_at desc`
-    )
-
-    const users = result.map((row) => {
-      const roleIds = `${row.role_ids_csv ?? ""}`.split(",").map((x) => x.trim()).filter(Boolean)
-      const blockedUntilIso = row.blocked_until ? new Date(row.blocked_until).toISOString() : undefined
-      const blockedByStatus = `${row.status ?? ""}`.toLowerCase() === "blocked"
-      const blockedByTime = row.blocked_until ? new Date(row.blocked_until).getTime() > Date.now() : false
-      return {
-        id: `${row.id}`,
-        username: `${row.username ?? ""}`,
-        email: `${row.email ?? ""}`,
-        birthDate: row.birth_date ? new Date(row.birth_date).toISOString().slice(0, 10) : "",
-        roleIds,
-        isAdmin: roleIds.includes("admin") || roleIds.includes("super_admin"),
-        createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
-        blocked: blockedByStatus || blockedByTime,
-        blockedUntil: blockedUntilIso,
-      }
-    })
-
-    return res.json({ users })
-  } catch (error) {
-    console.error("Admin members error:", error?.message ?? error)
-    return res.status(500).json({ error: "admin members failed" })
   }
 })
 
@@ -580,70 +533,26 @@ app.get("/food/wiki-image", async (req, res) => {
   }
 })
 
-const extractSerpShoppingResults = (data) => {
-  const byPrimary = Array.isArray(data?.shopping_results) ? data.shopping_results : []
-  if (byPrimary.length > 0) return byPrimary
-
-  const byInline = Array.isArray(data?.inline_shopping_results) ? data.inline_shopping_results : []
-  if (byInline.length > 0) return byInline
-
-  const byOrganic = Array.isArray(data?.organic_results)
-    ? data.organic_results.filter((item) => {
-        const hasPrice =
-          item?.price ||
-          item?.extracted_price ||
-          item?.price_from ||
-          item?.price_to ||
-          item?.extensions?.some?.((x) => /\d/.test(`${x ?? ""}`))
-        const hasOfferLink = item?.offer_link || item?.merchant_link || item?.product_link
-        return Boolean(hasPrice || hasOfferLink)
-      })
-    : []
-  if (byOrganic.length > 0) return byOrganic
-
-  return []
-}
-
 const fetchSerpApiProducts = async ({ query }) => {
   const apiKey = `${process.env.SERPAPI_API_KEY ?? ""}`.trim()
   if (!apiKey) return []
 
-  const runSerpRequest = async (extraParams = {}) => {
-    const params = new URLSearchParams({
-      q: query,
-      gl: process.env.SERPAPI_GL || "tr",
-      hl: process.env.SERPAPI_HL || "tr",
-      num: process.env.SERPAPI_NUM || "25",
-      api_key: apiKey,
-      ...extraParams,
-    })
+  const params = new URLSearchParams({
+    engine: "google_shopping",
+    q: query,
+    gl: process.env.SERPAPI_GL || "tr",
+    hl: process.env.SERPAPI_HL || "tr",
+    num: process.env.SERPAPI_NUM || "25",
+    api_key: apiKey,
+  })
 
-    const response = await fetch(`https://serpapi.com/search.json?${params.toString()}`)
-    if (!response.ok) {
-      const body = await response.text().catch(() => "")
-      throw new Error(`SerpApi failed: ${response.status}${body ? ` ${body.slice(0, 140)}` : ""}`)
-    }
-    return response.json()
+  const response = await fetch(`https://serpapi.com/search.json?${params.toString()}`)
+  if (!response.ok) {
+    throw new Error(`SerpApi failed: ${response.status}`)
   }
 
-  let data = null
-  try {
-    data = await runSerpRequest({ engine: "google_shopping" })
-  } catch (error) {
-    console.warn("SerpApi google_shopping failed:", error?.message ?? error)
-  }
-  let results = extractSerpShoppingResults(data)
-
-  // Some regions/accounts return empty shopping_results for google_shopping.
-  // Try classic google engine + tbm=shop as fallback.
-  if (results.length === 0) {
-    try {
-      data = await runSerpRequest({ engine: "google", tbm: "shop" })
-      results = extractSerpShoppingResults(data)
-    } catch (error) {
-      console.warn("SerpApi google tbm=shop failed:", error?.message ?? error)
-    }
-  }
+  const data = await response.json()
+  const results = Array.isArray(data?.shopping_results) ? data.shopping_results : []
 
   const toStoreSearchUrl = (storeName, productName) => {
     const s = normalizeText(storeName)
@@ -800,7 +709,7 @@ const buildTarotFallbackAnswer = ({ question, context }) => {
   return `${intro} ${intentLine} ${cardLine} ${focusLine} ${cautionLine} ${followUp}`
 }
 
-const preferredProvider = `${process.env.AI_PROVIDER ?? "openai"}`.trim().toLowerCase()
+const preferredProvider = `${process.env.AI_PROVIDER ?? "openrouter"}`.trim().toLowerCase()
 const explicitModel = `${process.env.AI_MODEL ?? ""}`.trim()
 
 const openrouterClient = process.env.OPENROUTER_API_KEY
@@ -808,7 +717,7 @@ const openrouterClient = process.env.OPENROUTER_API_KEY
       apiKey: process.env.OPENROUTER_API_KEY,
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
-        "HTTP-Referer": process.env.OPENROUTER_REFERER || "https://womio.net",
+        "HTTP-Referer": process.env.OPENROUTER_REFERER || "http://localhost:8082",
         "X-Title": "WOMIO",
       },
     })
@@ -877,191 +786,6 @@ const safeParseJson = (text) => {
     return null
   }
 }
-
-const clampPercent = (value, fallback = 0) => {
-  const n = Number(value)
-  if (!Number.isFinite(n)) return fallback
-  return Math.max(0, Math.min(100, Math.round(n)))
-}
-
-const isLikelyImagePayload = (value) => {
-  const v = `${value ?? ""}`.trim()
-  if (!v) return false
-  if (v.startsWith("data:image/")) return true
-  if (v.startsWith("http://") || v.startsWith("https://")) return true
-  return false
-}
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
-const pickOutputImage = (value) => {
-  if (typeof value === "string") {
-    const v = value.trim()
-    return isLikelyImagePayload(v) ? v : ""
-  }
-  if (Array.isArray(value)) {
-    for (let i = value.length - 1; i >= 0; i--) {
-      const candidate = pickOutputImage(value[i])
-      if (candidate) return candidate
-    }
-  }
-  if (value && typeof value === "object") {
-    const direct = `${value.url ?? value.image ?? value.output ?? ""}`.trim()
-    if (isLikelyImagePayload(direct)) return direct
-  }
-  return ""
-}
-
-const beautifyPrompt = ({ makeup = 40, young = 30, smooth = 45 }) => `
-Edit this face photo in a natural style.
-- Makeup strength: ${makeup}/100
-- Younger look: ${young}/100
-- Skin smoothing: ${smooth}/100
-Rules:
-- Keep the same person identity.
-- Keep realistic skin texture, avoid plastic look.
-- Keep background composition similar.
-- No text, no watermark, no logo.
-Output:
-- Return a single edited image only.
-`.trim()
-
-app.post("/photo-lab/beautify", async (req, res) => {
-  try {
-    const inputImage = `${req.body?.image ?? ""}`.trim()
-    if (!isLikelyImagePayload(inputImage)) {
-      return res.status(400).json({ ok: false, error: "image is required (data:image/* or http(s) URL)" })
-    }
-
-    const options = req.body?.options ?? {}
-    const makeup = clampPercent(options?.makeup, 40)
-    const young = clampPercent(options?.young, 30)
-    const smooth = clampPercent(options?.smooth, 45)
-
-    const modelVersion = `${process.env.FACE_EDIT_PROVIDER_MODEL_VERSION ?? ""}`.trim()
-    const providerUrl = `${process.env.FACE_EDIT_PROVIDER_URL ?? ""}`.trim()
-    const providerKey = `${process.env.FACE_EDIT_PROVIDER_KEY ?? ""}`.trim()
-
-    // Replicate direct integration (async prediction + polling).
-    const isReplicatePredictions = providerUrl.includes("replicate.com") && providerUrl.includes("/v1/predictions")
-    if (isReplicatePredictions && modelVersion) {
-      if (!providerKey) {
-        return res.status(500).json({ ok: false, error: "provider_key_missing" })
-      }
-
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${providerKey}`,
-      }
-      const createResponse = await fetch(providerUrl, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          version: modelVersion,
-          input: {
-            image: inputImage,
-            prompt: beautifyPrompt({ makeup, young, smooth }),
-            makeup_strength: Number((makeup / 100).toFixed(2)),
-            young_strength: Number((young / 100).toFixed(2)),
-            smooth_strength: Number((smooth / 100).toFixed(2)),
-          },
-        }),
-      })
-
-      if (!createResponse.ok) {
-        const errText = await createResponse.text().catch(() => "")
-        return res.status(502).json({
-          ok: false,
-          error: "replicate_create_failed",
-          details: `${createResponse.status} ${errText}`.slice(0, 320),
-        })
-      }
-
-      let prediction = await createResponse.json()
-      const pollMax = Math.max(1, Number(process.env.FACE_EDIT_POLL_MAX || 25))
-      const pollDelayMs = Math.max(500, Number(process.env.FACE_EDIT_POLL_DELAY_MS || 1500))
-
-      let status = `${prediction?.status ?? ""}`.trim()
-      for (let i = 0; i < pollMax && !["succeeded", "failed", "canceled"].includes(status); i++) {
-        const pollUrl = `${prediction?.urls?.get ?? ""}`.trim() || (prediction?.id ? `${providerUrl}/${prediction.id}` : "")
-        if (!pollUrl) break
-        await sleep(pollDelayMs)
-        const pollResponse = await fetch(pollUrl, { headers })
-        if (!pollResponse.ok) {
-          const errText = await pollResponse.text().catch(() => "")
-          return res.status(502).json({
-            ok: false,
-            error: "replicate_poll_failed",
-            details: `${pollResponse.status} ${errText}`.slice(0, 320),
-          })
-        }
-        prediction = await pollResponse.json()
-        status = `${prediction?.status ?? ""}`.trim()
-      }
-
-      if (`${prediction?.status ?? ""}`.trim() !== "succeeded") {
-        return res.status(502).json({
-          ok: false,
-          error: "replicate_not_succeeded",
-          status: `${prediction?.status ?? "unknown"}`,
-        })
-      }
-
-      const outputImage = pickOutputImage(prediction?.output)
-      if (!isLikelyImagePayload(outputImage)) {
-        return res.status(502).json({ ok: false, error: "replicate_invalid_output" })
-      }
-      return res.json({
-        ok: true,
-        source: "replicate",
-        outputImage,
-      })
-    }
-
-    // Generic provider bridge: connect any other face-edit service without changing mobile app.
-    if (providerUrl) {
-      const headers = { "Content-Type": "application/json" }
-      if (providerKey) headers.Authorization = `Bearer ${providerKey}`
-      const response = await fetch(providerUrl, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          image: inputImage,
-          options: { makeup, young, smooth },
-          prompt: beautifyPrompt({ makeup, young, smooth }),
-        }),
-      })
-      if (!response.ok) {
-        const errText = await response.text().catch(() => "")
-        return res.status(502).json({
-          ok: false,
-          error: "provider_request_failed",
-          details: `${response.status} ${errText}`.slice(0, 320),
-        })
-      }
-
-      const data = await response.json()
-      const outputImage = `${data?.outputImage ?? data?.image ?? data?.result ?? ""}`.trim()
-      if (!isLikelyImagePayload(outputImage)) {
-        return res.status(502).json({ ok: false, error: "provider_invalid_output" })
-      }
-      return res.json({
-        ok: true,
-        source: "face-provider",
-        outputImage,
-      })
-    }
-
-    return res.status(501).json({
-      ok: false,
-      error: "face_provider_not_configured",
-      hint: "Set FACE_EDIT_PROVIDER_URL, FACE_EDIT_PROVIDER_MODEL_VERSION and FACE_EDIT_PROVIDER_KEY.",
-    })
-  } catch (error) {
-    console.error("Photo lab beautify error:", error?.message ?? error)
-    return res.status(500).json({ ok: false, error: "photo_lab_failed" })
-  }
-})
 
 app.post("/astrology/coffee-verify", async (req, res) => {
   try {
