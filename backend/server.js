@@ -120,6 +120,27 @@ const ensureAuthSchema = async () => {
 
 const normalizeEmail = (email) => `${email ?? ""}`.trim().toLowerCase()
 
+const formatErrorDetail = (error) => {
+  if (!error) return "unknown_error"
+  const parts = []
+  const code = `${error.code ?? ""}`.trim()
+  const msg = `${error.sqlMessage ?? error.message ?? ""}`.trim()
+  const errno = `${error.errno ?? ""}`.trim()
+  const sqlState = `${error.sqlState ?? ""}`.trim()
+  if (code) parts.push(`code=${code}`)
+  if (errno) parts.push(`errno=${errno}`)
+  if (sqlState) parts.push(`sqlState=${sqlState}`)
+  if (msg) parts.push(`message=${msg}`)
+  if (!parts.length) {
+    try {
+      return JSON.stringify(error)
+    } catch {
+      return `${error}`
+    }
+  }
+  return parts.join(" | ")
+}
+
 const normalizeBirthDateInput = (value) => {
   const raw = `${value ?? ""}`.trim()
   if (!raw) return ""
@@ -235,8 +256,12 @@ app.post("/auth/register", async (req, res) => {
 
     return res.status(201).json({ token, user })
   } catch (error) {
-    console.error("Auth register error:", error?.message ?? error)
-    return res.status(500).json({ error: "register failed" })
+    const detail = formatErrorDetail(error)
+    console.error("Auth register error:", detail)
+    return res.status(500).json({
+      error: "register failed",
+      detail,
+    })
   }
 })
 
@@ -305,8 +330,12 @@ app.post("/auth/login", async (req, res) => {
     const token = createAccessToken(user)
     return res.json({ token, user })
   } catch (error) {
-    console.error("Auth login error:", error?.message ?? error)
-    return res.status(500).json({ error: "login failed" })
+    const detail = formatErrorDetail(error)
+    console.error("Auth login error:", detail)
+    return res.status(500).json({
+      error: "login failed",
+      detail,
+    })
   }
 })
 
