@@ -54,59 +54,6 @@ const dbQuery = async (text, params = []) => {
   return rows
 }
 
-const ensureAuthSchema = async () => {
-  if (!pool) return
-
-  await dbQuery(`
-    create table if not exists app_users (
-      id bigint unsigned not null auto_increment,
-      email varchar(190) not null,
-      username varchar(120) not null,
-      password_hash varchar(255) null,
-      birth_date date null,
-      locale varchar(10) not null default 'tr',
-      status enum('active', 'blocked', 'deleted') not null default 'active',
-      blocked_until datetime null,
-      created_at timestamp not null default current_timestamp,
-      updated_at timestamp not null default current_timestamp on update current_timestamp,
-      primary key (id),
-      unique key uq_app_users_email (email)
-    ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci
-  `)
-
-  await dbQuery(`
-    create table if not exists roles (
-      id bigint unsigned not null auto_increment,
-      code varchar(60) not null,
-      title varchar(120) not null,
-      created_at timestamp not null default current_timestamp,
-      primary key (id),
-      unique key uq_roles_code (code)
-    ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci
-  `)
-
-  await dbQuery(`
-    create table if not exists user_roles (
-      user_id bigint unsigned not null,
-      role_id bigint unsigned not null,
-      assigned_at timestamp not null default current_timestamp,
-      primary key (user_id, role_id),
-      key idx_user_roles_role_id (role_id),
-      constraint fk_user_roles_user foreign key (user_id) references app_users(id) on delete cascade,
-      constraint fk_user_roles_role foreign key (role_id) references roles(id) on delete cascade
-    ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci
-  `)
-
-  await dbQuery(
-    `insert into roles (code, title) values
-      ('super_admin', 'Super Admin'),
-      ('admin', 'Admin'),
-      ('moderator', 'Moderator'),
-      ('member', 'Member')
-     on duplicate key update title = values(title)`
-  )
-}
-
 const normalizeEmail = (email) => `${email ?? ""}`.trim().toLowerCase()
 
 const buildAuthUser = (row, roleIds = []) => ({
@@ -1649,19 +1596,8 @@ app.get("/health", (_req, res) => {
 })
 
 const port = Number(process.env.PORT) || 5000
-
-const startServer = async () => {
-  try {
-    await ensureAuthSchema()
-  } catch (error) {
-    console.error("Schema init error:", error?.message ?? error)
-  }
-
-  app.listen(port, "0.0.0.0", () => {
-    const { provider } = resolveAiClient()
-    console.log("AI provider: " + provider + " | model: " + getDefaultModel(provider))
-    console.log("Server running on port " + port)
-  })
-}
-
-void startServer()
+app.listen(port, "0.0.0.0", () => {
+  const { provider } = resolveAiClient()
+  console.log("AI provider: " + provider + " | model: " + getDefaultModel(provider))
+  console.log("Server running on port " + port)
+})
