@@ -74,17 +74,6 @@ const ensureAuthSchema = async () => {
     ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_unicode_ci
   `)
 
-  // If an older schema exists, complete missing auth columns safely.
-  await dbQuery(`
-    alter table app_users
-      add column if not exists birth_date date null,
-      add column if not exists status enum('active', 'blocked', 'deleted') not null default 'active',
-      add column if not exists blocked_until datetime null,
-      add column if not exists password_hash varchar(255) null,
-      add column if not exists locale varchar(10) not null default 'tr',
-      add column if not exists updated_at timestamp not null default current_timestamp on update current_timestamp
-  `)
-
   await dbQuery(`
     create table if not exists roles (
       id bigint unsigned not null auto_increment,
