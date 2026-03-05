@@ -120,33 +120,6 @@ const ensureAuthSchema = async () => {
 
 const normalizeEmail = (email) => `${email ?? ""}`.trim().toLowerCase()
 
-const normalizeBirthDateInput = (value) => {
-  const raw = `${value ?? ""}`.trim()
-  if (!raw) return ""
-
-  // already ISO: YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw
-
-  // UI may send DD/MM/YYYY or DD.MM.YYYY
-  const m = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/)
-  if (!m) return ""
-  const day = Number(m[1])
-  const month = Number(m[2])
-  const year = Number(m[3])
-  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) return ""
-  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return ""
-
-  const iso = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-  const dt = new Date(`${iso}T00:00:00Z`)
-  if (Number.isNaN(dt.getTime())) return ""
-  // Guard invalid dates such as 31/02/2024
-  const y = dt.getUTCFullYear()
-  const mo = dt.getUTCMonth() + 1
-  const d = dt.getUTCDate()
-  if (y !== year || mo !== month || d !== day) return ""
-  return iso
-}
-
 const buildAuthUser = (row, roleIds = []) => ({
   id: row.id,
   username: row.username,
@@ -197,7 +170,7 @@ app.post("/auth/register", async (req, res) => {
     const username = `${req.body?.username ?? ""}`.trim()
     const email = normalizeEmail(req.body?.email)
     const password = `${req.body?.password ?? ""}`
-    const birthDate = normalizeBirthDateInput(req.body?.birthDate)
+    const birthDate = `${req.body?.birthDate ?? ""}`.trim()
 
     if (!username || !email || !password) {
       return res.status(400).json({ error: "username, email and password are required" })
