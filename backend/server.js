@@ -177,29 +177,7 @@ app.post("/auth/login", async (req, res) => {
     }
 
     const row = result[0]
-    const storedHash = `${row.password_hash ?? ""}`.trim()
-    const isBcryptHash = /^\$2[aby]\$/.test(storedHash)
-    let isPasswordOk = false
-
-    if (storedHash) {
-      if (isBcryptHash) {
-        try {
-          isPasswordOk = await bcrypt.compare(password, storedHash)
-        } catch (hashError) {
-          console.error("Auth login hash compare error:", hashError?.message ?? hashError)
-          isPasswordOk = false
-        }
-      } else {
-        // Backward compatibility: some old records may have plain text password.
-        // If matched, migrate immediately to bcrypt hash.
-        isPasswordOk = storedHash === password
-        if (isPasswordOk) {
-          const nextHash = await bcrypt.hash(password, 10)
-          await dbQuery("update app_users set password_hash = ? where id = ?", [nextHash, row.id])
-        }
-      }
-    }
-
+    const isPasswordOk = row.password_hash ? await bcrypt.compare(password, row.password_hash) : false
     if (!isPasswordOk) {
       return res.status(401).json({ error: "invalid credentials" })
     }
