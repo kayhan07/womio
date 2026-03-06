@@ -1,6 +1,6 @@
-﻿import { Stack } from "expo-router"
-import { t, useAppLanguage } from "@/src/core/i18n"
-import { moduleTheme } from "@/src/theme/moduleStyles"
+import { Stack } from "expo-router"
+import { t, useAppLanguage } from "../../../src/core/i18n"
+import { moduleTheme } from "../../../src/theme/moduleStyles"
 
 export default function ShoppingLayout() {
   const { language, ready } = useAppLanguage()

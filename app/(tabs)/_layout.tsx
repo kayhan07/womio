@@ -1,13 +1,13 @@
-﻿import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import { Tabs } from "expo-router"
 import { useEffect, useRef, useState } from "react"
 import { Animated, StyleSheet, View } from "react-native"
-import { t, useAppLanguage } from "@/src/core/i18n"
-import { CHAT_CURRENT_USER_ID, getUnreadCountForUser } from "@/src/modules/chat/storage"
-import { defaultAdminConfig, loadAdminConfig } from "@/src/modules/monetization/adminConfig"
-import { useAppAppearance } from "@/src/theme/appearance"
-import { moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { t, useAppLanguage } from "../../src/core/i18n"
+import { CHAT_CURRENT_USER_ID, getUnreadCountForUser } from "../../src/modules/chat/storage"
+import { defaultAdminConfig, loadAdminConfig } from "../../src/modules/monetization/adminConfig"
+import { useAppAppearance } from "../../src/theme/appearance"
+import { moduleTheme } from "../../src/theme/moduleStyles"
+import { tc } from "../../src/theme/tokens"
 import Header from "../components/Header"
 
 export default function TabLayout() {
@@ -98,7 +98,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="health"
           options={{
-            href: moduleFlags.health ? "/health" : null,
+            href: null,
             title: t("tabHealth", language),
             tabBarIcon: ({ color, size }) => <Ionicons name="heart" size={size} color={color} />,
           }}
@@ -106,7 +106,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="services"
           options={{
-            href: moduleFlags.services ? "/services" : null,
+            href: null,
             title: t("tabServices", language),
             tabBarIcon: ({ color, size }) => <Ionicons name="briefcase" size={size} color={color} />,
           }}
@@ -114,7 +114,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="shopping"
           options={{
-            href: moduleFlags.shopping ? "/shopping" : null,
+            href: null,
             title: t("tabShopping", language),
             tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} />,
           }}
@@ -122,7 +122,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="food"
           options={{
-            href: moduleFlags.food ? "/food" : null,
+            href: null,
             title: t("tabFood", language),
             tabBarIcon: ({ color, size }) => <Ionicons name="restaurant" size={size} color={color} />,
           }}
@@ -139,7 +139,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="astrology"
           options={{
-            href: moduleFlags.astrology ? "/astrology" : null,
+            href: null,
             title: t("tabAstrology", language),
             tabBarIcon: ({ color, size }) => <Ionicons name="moon" size={size} color={color} />,
           }}
@@ -150,6 +150,14 @@ export default function TabLayout() {
             href: moduleFlags.profile ? "/profile" : null,
             title: t("tabProfile", language),
             tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="photo-lab"
+          options={{
+            href: null,
+            title: language === "tr" ? "Foto" : "Photo",
+            tabBarIcon: ({ color, size }) => <Ionicons name="sparkles" size={size} color={color} />,
           }}
         />
         <Tabs.Screen name="cycle" options={{ href: null }} />

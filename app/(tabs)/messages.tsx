@@ -1,11 +1,11 @@
-﻿import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import { useLocalSearchParams } from "expo-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
 import { Image } from "expo-image"
 import * as ImagePicker from "expo-image-picker"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { ModuleInput } from "@/src/components/ui/ModulePrimitives"
+import { moduleStyles, moduleTheme } from "../../src/theme/moduleStyles"
+import { ModuleInput } from "../../src/components/ui/ModulePrimitives"
 import {
   blockUser,
   CHAT_CURRENT_USER_ID,
@@ -21,7 +21,7 @@ import {
   reportUser,
   sendMessageToConversation,
   unblockUser,
-} from "@/src/modules/chat/storage"
+} from "../../src/modules/chat/storage"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import {
   SupportTicketCategory,
@@ -29,8 +29,10 @@ import {
   SupportTicket,
   createSupportTicket,
   loadSupportTickets,
-} from "@/src/modules/support/storage"
-import { tc } from "@/src/theme/tokens"
+} from "../../src/modules/support/storage"
+import { tc } from "../../src/theme/tokens"
+import { AppAvatar } from "../../src/components/ui/AppAvatar"
+import { loadProfileAvatarConfig, normalizeAvatarConfig, ProfileAvatarConfig } from "../../src/modules/profile/avatar"
 
 const BRAND = moduleTheme.colors.brand
 
@@ -52,6 +54,7 @@ export default function MessagesScreen() {
   const [supportCategory, setSupportCategory] = useState<SupportTicketCategory>("technical")
   const [supportPriority, setSupportPriority] = useState<SupportTicketPriority>("medium")
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([])
+  const [currentAvatar, setCurrentAvatar] = useState<ProfileAvatarConfig | null>(null)
 
   const reload = useCallback(async () => {
     const [c, m, blocked, tickets, profileRaw] = await Promise.all([
@@ -80,6 +83,7 @@ export default function MessagesScreen() {
       (t) => t.userId === CHAT_CURRENT_USER_ID || (!!email && t.userEmail?.toLowerCase() === email)
     )
     setSupportTickets(mineTickets)
+    setCurrentAvatar(await loadProfileAvatarConfig())
     if (params.conversationId && mine.some((x) => x.id === params.conversationId)) {
       setSelectedConversationId(params.conversationId)
     } else if (!selectedConversationId && mine[0]) {
@@ -278,14 +282,6 @@ export default function MessagesScreen() {
     ])
   }
 
-  const getInitials = (name: string) => {
-    const safe = `${name || ""}`.trim()
-    if (!safe) return "?"
-    const parts = safe.split(" ").filter(Boolean)
-    if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase()
-    return `${parts[0].slice(0, 1)}${parts[1].slice(0, 1)}`.toUpperCase()
-  }
-
   return (
     <ScrollView contentContainerStyle={styles.page}>
       <View style={styles.container}>
@@ -352,11 +348,12 @@ export default function MessagesScreen() {
                 onPress={() => setSelectedConversationId(c.id)}
               >
                 <View style={styles.convRow}>
-                  <View style={[styles.avatar, selectedConversationId === c.id && styles.avatarActive]}>
-                    <Text style={[styles.avatarText, selectedConversationId === c.id && styles.avatarTextActive]}>
-                      {getInitials(c.participantNames[other] || "Kullanıcı")}
-                    </Text>
-                  </View>
+                  <AppAvatar
+                    avatar={c.participantAvatars?.[other] ? normalizeAvatarConfig(c.participantAvatars[other]) : null}
+                    name={c.participantNames[other] || "Kullanıcı"}
+                    size={34}
+                    active={selectedConversationId === c.id}
+                  />
                   <View style={styles.convMain}>
                     <View style={styles.convTop}>
                       <Text style={[styles.convName, selectedConversationId === c.id && styles.convNameActive]}>
@@ -400,6 +397,25 @@ export default function MessagesScreen() {
           </View>
           {!!selectedConversation ? (
             <>
+              <View style={styles.conversationHero}>
+                <AppAvatar
+                  avatar={
+                    otherUserId && selectedConversation.participantAvatars?.[otherUserId]
+                      ? normalizeAvatarConfig(selectedConversation.participantAvatars[otherUserId])
+                      : null
+                  }
+                  name={otherUserId ? (selectedConversation.participantNames[otherUserId] || "Kullanıcı") : "Kullanıcı"}
+                  size={42}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.conversationHeroName}>
+                    {otherUserId ? (selectedConversation.participantNames[otherUserId] || "Kullanıcı") : "Kullanıcı"}
+                  </Text>
+                  <Text style={styles.conversationHeroMeta}>
+                    {selectedConversation.source === "shopping" ? "Satış sohbeti" : "İlan sohbeti"} • {selectedConversation.postTitle}
+                  </Text>
+                </View>
+              </View>
               <View style={styles.actionRow}>
                 <Pressable style={styles.actionChip} onPress={() => void onBlockToggle()}>
                   <Text style={styles.actionChipText}>{isBlocked ? "Engeli Kaldır" : "Kullanıcıyı Engelle"}</Text>
@@ -415,6 +431,17 @@ export default function MessagesScreen() {
                     style={[styles.msgBubble, m.senderId === CHAT_CURRENT_USER_ID ? styles.msgMine : styles.msgOther]}
                   >
                     <View style={styles.msgHead}>
+                      <AppAvatar
+                        avatar={
+                          m.senderId === CHAT_CURRENT_USER_ID
+                            ? currentAvatar
+                            : selectedConversation?.participantAvatars?.[m.senderId]
+                              ? normalizeAvatarConfig(selectedConversation.participantAvatars[m.senderId])
+                              : null
+                        }
+                        name={m.senderName}
+                        size={18}
+                      />
                       <Text style={styles.msgSender}>{m.senderName}</Text>
                     </View>
                     {!!m.imageUri && <Image source={{ uri: m.imageUri }} style={styles.msgImage} contentFit="cover" />}
@@ -668,6 +695,19 @@ const styles = StyleSheet.create({
   sectionPillText: { color: tc("#7A5367"), fontSize: 10, fontWeight: "600" },
   sectionHint: { color: tc("#8A6478"), fontSize: 11, fontWeight: "600" },
   sectionTitle: { color: moduleTheme.colors.textStrong, fontSize: 14, fontWeight: "600", marginBottom: 8 },
+  conversationHero: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: tc("#E4D2C4"),
+    backgroundColor: tc("rgba(255,255,255,0.82)"),
+    padding: 9,
+    marginBottom: 8,
+  },
+  conversationHeroName: { color: moduleTheme.colors.textStrong, fontSize: 13, fontWeight: "700" },
+  conversationHeroMeta: { color: tc("#8A6478"), fontSize: 11, marginTop: 2, fontWeight: "600" },
   convItem: {
     borderRadius: 12,
     borderWidth: 1,
@@ -732,7 +772,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: tc("#E4D2C4"),
   },
-  msgHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 2 },
+  msgHead: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 2 },
+  msgSenderDot: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: tc("#E6D2C6"),
+    backgroundColor: tc("#FFF4EC"),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  msgSenderDotText: { color: tc("#6E5549"), fontSize: 8, fontWeight: "700" },
   msgSender: { color: tc("#7A5367"), fontSize: 10, fontWeight: "600" },
   msgImage: {
     width: 160,

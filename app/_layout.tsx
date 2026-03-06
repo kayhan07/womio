@@ -1,7 +1,12 @@
 import { Stack } from "expo-router"
+import { useEffect } from "react"
+import * as SplashScreen from "expo-splash-screen"
 import { StyleSheet, View } from "react-native"
-import { AppearanceProvider, useAppAppearance } from "@/src/theme/appearance"
-import { AppLanguageProvider } from "@/src/core/i18n"
+import { AppearanceProvider, useAppAppearance } from "../src/theme/appearance"
+import { AppLanguageProvider } from "../src/core/i18n"
+import { runInitialPermissionBootstrap } from "../src/core/permissions/bootstrap"
+
+void SplashScreen.preventAutoHideAsync()
 
 export default function Layout() {
   return (
@@ -16,6 +21,25 @@ export default function Layout() {
 function RootStack() {
   const { mode } = useAppAppearance()
   const isDark = mode === "dark"
+
+  useEffect(() => {
+    let isMounted = true
+    const boot = async () => {
+      try {
+        await runInitialPermissionBootstrap()
+      } finally {
+        // Keep splash visible briefly so logo is clearly seen before login/home.
+        setTimeout(() => {
+          if (!isMounted) return
+          void SplashScreen.hideAsync()
+        }, 900)
+      }
+    }
+    void boot()
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   return (
     <View style={[styles.bg, isDark && styles.bgDark]}>

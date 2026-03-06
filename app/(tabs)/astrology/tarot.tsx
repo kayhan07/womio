@@ -1,11 +1,10 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Animated,
   ImageBackground,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,8 +14,8 @@ import {
   useWindowDimensions,
 } from "react-native"
 import * as Speech from "expo-speech"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { moduleStyles, moduleTheme } from "../../../src/theme/moduleStyles"
+import { tc } from "../../../src/theme/tokens"
 
 type TarotType = "daily" | "love" | "career"
 type DrawMode = "single" | "spread"

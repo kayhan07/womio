@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
-import { applyThemeMode } from "@/src/theme/runtimeTheme"
+import { applyThemeMode } from "./runtimeTheme"
 
 export type AppearanceMode = "light" | "dark"
 

@@ -1,12 +1,12 @@
-﻿import { useRouter } from "expo-router"
+import { useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useEffect, useMemo, useRef } from "react"
 import { Animated, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native"
-import { t, useAppLanguage } from "@/src/core/i18n"
-import { SectionHeader } from "@/src/modules/shopping/ui/SectionHeader"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
-import { cardMotionStyle, ensureEnterAnimArray, getOrCreatePressAnim, pressIn, pressOut, runStaggerEnter } from "@/src/ui/motion"
+import { t, useAppLanguage } from "../../../src/core/i18n"
+import { SectionHeader } from "../../../src/modules/shopping/ui/SectionHeader"
+import { moduleStyles, moduleTheme } from "../../../src/theme/moduleStyles"
+import { tc } from "../../../src/theme/tokens"
+import { cardMotionStyle, ensureEnterAnimArray, getOrCreatePressAnim, pressIn, pressOut, runStaggerEnter } from "../../../src/ui/motion"
 
 const BRAND = moduleTheme.colors.brand
 
@@ -33,7 +33,7 @@ export default function AstrologyHubScreen() {
 
   useMemo(() => {
     return ensureEnterAnimArray(enterAnims, cardKeys.length)
-  }, [])
+  }, [cardKeys.length])
 
   useEffect(() => {
     runStaggerEnter(enterAnims)

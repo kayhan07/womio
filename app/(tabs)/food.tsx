@@ -1,16 +1,16 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Animated, ImageBackground, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from "react-native"
-import { useAppLanguage } from "@/src/core/i18n"
-import { FOOD_RECIPES, type Cat, type Meal, type FoodRecipe, normalizeFoodText } from "@/src/modules/food/recipes"
-import { FOOD_LOCAL_IMAGE_MAP } from "@/src/modules/food/localImageMap"
-import { loadMarketItems, saveMarketItems } from "@/src/modules/shopping/storage"
-import { MarketItem } from "@/src/modules/shopping/types"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
-import { cardMotionStyle, ensureEnterAnimArray, getOrCreatePressAnim, pressIn, pressOut, runStaggerEnter } from "@/src/ui/motion"
+import { Alert, Animated, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
+import { useAppLanguage } from "../../src/core/i18n"
+import { FOOD_RECIPES, type Cat, type Meal, type FoodRecipe, normalizeFoodText } from "../../src/modules/food/recipes"
+import { FOOD_LOCAL_IMAGE_MAP } from "../../src/modules/food/localImageMap"
+import { loadMarketItems, saveMarketItems } from "../../src/modules/shopping/storage"
+import { MarketItem } from "../../src/modules/shopping/types"
+import { moduleStyles, moduleTheme } from "../../src/theme/moduleStyles"
+import { tc } from "../../src/theme/tokens"
+import { cardMotionStyle, ensureEnterAnimArray, getOrCreatePressAnim, pressIn, pressOut, runStaggerEnter } from "../../src/ui/motion"
 
 const STORAGE = "foodModuleV5"
 const HERO = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1400&q=80"
@@ -56,15 +56,11 @@ const LOCAL_COVER_META: Record<string, { label: string; a: string; b: string; ur
 }
 const POPULAR_CARD_W = 276
 const POPULAR_GAP = 10
-const API_BASE = `${process.env.EXPO_PUBLIC_API_BASE_URL || "https://womio.net/api"}`.trim().replace(/\/+$/, "")
 type Difficulty = "all" | "easy" | "medium" | "hard"
 type WeeklyMenuDay = { soupId: string; mainId: string; sideId: string; saladId: string }
 type MarketUnit = "adet" | "g" | "ml" | "yemek kaşığı" | "su bardağı" | "çay kaşığı"
 type MarketStoreUnit = "adet" | "g" | "ml"
 type MarketDraftLine = { key: string; name: string; qty: number; unit: MarketStoreUnit }
-const FOOD_WIKI_ENDPOINT =
-  process.env.EXPO_PUBLIC_FOOD_WIKI_ENDPOINT ||
-  `${API_BASE}/food/wiki-image`
 
 const norm = normalizeFoodText
 const recipeDifficulty = (prep: number): Exclude<Difficulty, "all"> => (prep <= 20 ? "easy" : prep <= 40 ? "medium" : "hard")
@@ -123,7 +119,7 @@ const ingredientAmountTr = (name: string, servings: number) => {
 const ingredientDisplayAmountTr = (name: string, servings: number) => {
   const base = ingredientAmountTr(name, servings)
   const n = norm(name)
-  const perPieceGram: Array<[string, number]> = [
+  const perPieceGram: [string, number][] = [
     ["domates", 120],
     ["sogan", 100],
     ["biber", 80],
@@ -151,7 +147,7 @@ const formatQtyUnitDisplay = (name: string, qty: number, unit: string) => {
   if (unit === "g") return formatGramAsKg(qty)
   if (unit !== "adet") return `${qty} ${unit}`.trim()
   const n = norm(name)
-  const perPieceGram: Array<[string, number]> = [
+  const perPieceGram: [string, number][] = [
     ["domates", 120],
     ["sogan", 100],
     ["biber", 80],
@@ -262,7 +258,7 @@ const TR_WORD_FIXES: Record<string, string> = {
   kahvalti: "kahvaltı",
   tabagi: "tabağı",
 }
-const TR_PHRASE_FIXES: Array<[string, string]> = [
+const TR_PHRASE_FIXES: [string, string][] = [
   ["didik tavuk", "tavuk göğsü didiklenmiş"],
   ["kusbasi et", "dana kuşbaşı"],
   ["hindi", "hindi göğüs"],
@@ -387,7 +383,6 @@ export default function FoodScreen() {
   useEffect(() => {
     runStaggerEnter(popularEnterAnims)
   }, [popular.length])
-  const quick = useMemo(() => FOOD_RECIPES.filter((r) => r.prep <= 20).slice(0, 8), [])
   const weekPlan = useMemo(
     () =>
       weeklyMenu.map((d) => ({
@@ -448,7 +443,7 @@ export default function FoodScreen() {
     note(tr ? "Eksikler market listesine eklendi." : "Missing items added.")
   }
 
-  const buildMarketDraft = (rows: Array<{ name: string; servingsCount: number }>) => {
+  const buildMarketDraft = (rows: { name: string; servingsCount: number }[]) => {
     const map = new Map<string, MarketDraftLine>()
     rows.forEach((row) => {
       const cleanName = normalizeIngredientLabel(row.name)
@@ -562,19 +557,19 @@ export default function FoodScreen() {
     })
   }
 
-  const weeklyText = () => {
-    const days = tr ? ["Pzt", "Salı", "Çarş", "Perş", "Cuma", "Ctesi", "Pazar"] : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    const lines = [tr ? "Haftalık Yemek Planı" : "Weekly Meal Plan", `(${servings} kişi)`]
-    weekPlan.forEach((d, i) => {
-      lines.push(`${days[i]}:`)
-      lines.push(`  - ${tr ? "Çorba" : "Soup"}: ${d.soup ? `${d.soup.title} (${d.soup.prep} dk)` : "-"}`)
-      lines.push(`  - ${tr ? "Ana Yemek" : "Main"}: ${d.main ? `${d.main.title} (${d.main.prep} dk)` : "-"}`)
-      lines.push(`  - ${tr ? "Ek Yemek" : "Side"}: ${d.side ? `${d.side.title} (${d.side.prep} dk)` : "-"}`)
-      lines.push(`  - ${tr ? "Salata" : "Salad"}: ${d.salad ? `${d.salad.title} (${d.salad.prep} dk)` : "-"}`)
-    })
-    lines.push("", tr ? "Gerekli Malzemeler" : "Needed Ingredients")
-    weekNeedsMarket.forEach((i) => lines.push(`- ${displayText(i.name)}: ${formatQtyUnitDisplay(i.name, i.qty, i.unit)}`))
-    return lines.join("\n")
+  const confirmRemoveWeeklyItem = (dayIndex: number, key: keyof WeeklyMenuDay) => {
+    Alert.alert(
+      tr ? "Öğeyi Kaldır" : "Remove Item",
+      tr ? "Bu öğeyi haftalık menüden kaldırmak istiyor musun?" : "Do you want to remove this item from weekly menu?",
+      [
+        { text: tr ? "Vazgeç" : "Cancel", style: "cancel" },
+        {
+          text: tr ? "Kaldır" : "Remove",
+          style: "destructive",
+          onPress: () => removeWeeklyItem(dayIndex, key),
+        },
+      ]
+    )
   }
 
   const recipeOneLine = (r: FoodRecipe) => {
@@ -587,37 +582,6 @@ export default function FoodScreen() {
     }
     return `For ${servings} servings of ${r.title}, you can use: ${ing}. Estimated total prep and cook time is ${r.prep} minutes. Before cooking, place and prep all ingredients so the flow stays easy and consistent. Cooking steps: ${steps}. Keep the heat at a controlled medium level so ingredients cook through without drying out, and build flavor gradually by adding aromatics and seasoning in stages instead of all at once. For texture-focused dishes (soups, sauces, purees), stir in short intervals and add small amounts of hot water if needed to reach the right consistency. Right before serving, do a final taste check and balance salt, spice, and acidity to your preference for a softer, more complete result.`
   }
-  const shareWA = async () => {
-    const text = weeklyText()
-    const e = encodeURIComponent(text)
-    const appUrl = `whatsapp://send?text=${e}`
-    const webUrl = `https://wa.me/?text=${e}`
-    try {
-      if (Platform.OS !== "web" && await Linking.canOpenURL(appUrl)) return void (await Linking.openURL(appUrl))
-      if (await Linking.canOpenURL(webUrl)) return void (await Linking.openURL(webUrl))
-      await Share.share({ message: text })
-    } catch {
-      await Share.share({ message: text })
-    }
-  }
-
-  const exportPdf = async () => {
-    const text = weeklyText()
-    if (Platform.OS === "web") {
-      const w = (globalThis as any).open?.("", "_blank")
-      if (w?.document) {
-        w.document.write(`<html><body style="font-family:Arial;padding:24px;white-space:pre-wrap;">${text.replaceAll("\n", "<br/>")}</body></html>`)
-        w.document.close()
-        w.focus()
-        w.print()
-        return note(tr ? "Yazdır ekranında PDF seç." : "Use print > PDF.")
-      }
-    }
-    await Share.share({ message: text })
-  }
-
-  const mealLabel = (m: Meal) => (tr ? (m === "breakfast" ? "Kahvaltı" : m === "lunch" ? "Öğle" : m === "dinner" ? "Akşam" : "Ara Öğün") : m)
-  const catLabel = (c: Cat) => (tr ? (c === "all" ? "Hepsi" : c === "soup" ? "Sulu" : c === "oven" ? "Fırın" : c === "quick" ? "Pratik 20 dk" : "Çocuk") : c)
   const diffLabel = (d: Difficulty) => (tr ? (d === "all" ? "Hepsi" : d === "easy" ? "Kolay" : d === "medium" ? "Orta" : "Zor") : d)
   const recipeDiffLabel = (prep: number) => diffLabel(recipeDifficulty(prep))
   const goPopular = (delta: number) => {
@@ -691,11 +655,89 @@ export default function FoodScreen() {
         <Pressable style={s.pBtn} onPress={createWeekly}><Text style={s.pTxt}>{weeklyMenu.length ? (tr ? "Menüyü Yenile" : "Refresh Menu") : (tr ? "Haftalık Menü Oluştur" : "Create Weekly Menu")}</Text></Pressable>
         {weekPlan.map((d, i) => (
           <View key={`menu-${i}`} style={s.weekMenu}>
-            <View style={s.weekTop}><Text style={s.weekDay}>{(tr ? ["Pzt", "Salı", "Çarş", "Perş", "Cuma", "Ctesi", "Pazar"] : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])[i]}</Text></View>
-            <View style={s.weekLine}><Text style={s.weekLabel}>{tr ? "Çorba" : "Soup"}</Text><Pressable style={s.weekRecipeTap} onPress={() => openWeekRecipe(d.soup)} disabled={!d.soup}><Text style={[s.iTxt, !d.soup && s.iTxtMuted]}>{d.soup ? displayText(d.soup.title) : "-"}</Text></Pressable>{d.soup ? <View style={s.diffPill}><Text style={s.diffPillTxt}>{recipeDiffLabel(d.soup.prep)}</Text></View> : null}<Pressable style={s.weekActionBtn} onPress={() => refreshWeeklyItem(i, "soupId")}><Text style={s.weekActionTxt}>{tr ? "Yenile" : "Refresh"}</Text></Pressable><Pressable style={s.dayRemoveBtn} onPress={() => removeWeeklyItem(i, "soupId")}><Text style={s.dayRemoveTxt}>{tr ? "Kaldır" : "Remove"}</Text></Pressable></View>
-            <View style={s.weekLine}><Text style={s.weekLabel}>{tr ? "Ana" : "Main"}</Text><Pressable style={s.weekRecipeTap} onPress={() => openWeekRecipe(d.main)} disabled={!d.main}><Text style={[s.iTxt, !d.main && s.iTxtMuted]}>{d.main ? displayText(d.main.title) : "-"}</Text></Pressable>{d.main ? <View style={s.diffPill}><Text style={s.diffPillTxt}>{recipeDiffLabel(d.main.prep)}</Text></View> : null}<Pressable style={s.weekActionBtn} onPress={() => refreshWeeklyItem(i, "mainId")}><Text style={s.weekActionTxt}>{tr ? "Yenile" : "Refresh"}</Text></Pressable><Pressable style={s.dayRemoveBtn} onPress={() => removeWeeklyItem(i, "mainId")}><Text style={s.dayRemoveTxt}>{tr ? "Kaldır" : "Remove"}</Text></Pressable></View>
-            <View style={s.weekLine}><Text style={s.weekLabel}>{tr ? "Ek" : "Side"}</Text><Pressable style={s.weekRecipeTap} onPress={() => openWeekRecipe(d.side)} disabled={!d.side}><Text style={[s.iTxt, !d.side && s.iTxtMuted]}>{d.side ? displayText(d.side.title) : "-"}</Text></Pressable>{d.side ? <View style={s.diffPill}><Text style={s.diffPillTxt}>{recipeDiffLabel(d.side.prep)}</Text></View> : null}<Pressable style={s.weekActionBtn} onPress={() => refreshWeeklyItem(i, "sideId")}><Text style={s.weekActionTxt}>{tr ? "Yenile" : "Refresh"}</Text></Pressable><Pressable style={s.dayRemoveBtn} onPress={() => removeWeeklyItem(i, "sideId")}><Text style={s.dayRemoveTxt}>{tr ? "Kaldır" : "Remove"}</Text></Pressable></View>
-            <View style={s.weekLine}><Text style={s.weekLabel}>{tr ? "Salata" : "Salad"}</Text><Pressable style={s.weekRecipeTap} onPress={() => openWeekRecipe(d.salad)} disabled={!d.salad}><Text style={[s.iTxt, !d.salad && s.iTxtMuted]}>{d.salad ? displayText(d.salad.title) : "-"}</Text></Pressable>{d.salad ? <View style={s.diffPill}><Text style={s.diffPillTxt}>{recipeDiffLabel(d.salad.prep)}</Text></View> : null}<Pressable style={s.weekActionBtn} onPress={() => refreshWeeklyItem(i, "saladId")}><Text style={s.weekActionTxt}>{tr ? "Yenile" : "Refresh"}</Text></Pressable><Pressable style={s.dayRemoveBtn} onPress={() => removeWeeklyItem(i, "saladId")}><Text style={s.dayRemoveTxt}>{tr ? "Kaldır" : "Remove"}</Text></Pressable></View>
+            <View style={s.weekTop}>
+              <Text style={s.weekDay}>{(tr ? ["Pzt", "Salı", "Çarş", "Perş", "Cuma", "Ctesi", "Pazar"] : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])[i]}</Text>
+            </View>
+
+            <View style={s.weekLine}>
+              <View style={s.weekMain}>
+                <Text style={s.weekLabel}>{tr ? "Çorba" : "Soup"}</Text>
+                <Pressable style={s.weekRecipeTap} onPress={() => openWeekRecipe(d.soup)} disabled={!d.soup}>
+                  <Text numberOfLines={2} style={[s.weekRecipeText, !d.soup && s.iTxtMuted]}>{d.soup ? displayText(d.soup.title) : "-"}</Text>
+                </Pressable>
+                {d.soup ? <View style={s.diffPill}><Text style={s.diffPillTxt}>{recipeDiffLabel(d.soup.prep)}</Text></View> : null}
+              </View>
+              <View style={s.weekActions}>
+                <Pressable style={s.weekActionBtn} onPress={() => refreshWeeklyItem(i, "soupId")}>
+                  <Ionicons name="refresh-outline" size={14} color={tc("#8D315B")} />
+                  <Text style={s.weekActionTxt}>{tr ? "Yenile" : "Refresh"}</Text>
+                </Pressable>
+                <Pressable style={s.dayRemoveBtn} onPress={() => confirmRemoveWeeklyItem(i, "soupId")}>
+                  <Ionicons name="trash-outline" size={14} color={tc("#6B4A3C")} />
+                  <Text style={s.dayRemoveTxt}>{tr ? "Kaldır" : "Remove"}</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={s.weekLine}>
+              <View style={s.weekMain}>
+                <Text style={s.weekLabel}>{tr ? "Ana" : "Main"}</Text>
+                <Pressable style={s.weekRecipeTap} onPress={() => openWeekRecipe(d.main)} disabled={!d.main}>
+                  <Text numberOfLines={2} style={[s.weekRecipeText, !d.main && s.iTxtMuted]}>{d.main ? displayText(d.main.title) : "-"}</Text>
+                </Pressable>
+                {d.main ? <View style={s.diffPill}><Text style={s.diffPillTxt}>{recipeDiffLabel(d.main.prep)}</Text></View> : null}
+              </View>
+              <View style={s.weekActions}>
+                <Pressable style={s.weekActionBtn} onPress={() => refreshWeeklyItem(i, "mainId")}>
+                  <Ionicons name="refresh-outline" size={14} color={tc("#8D315B")} />
+                  <Text style={s.weekActionTxt}>{tr ? "Yenile" : "Refresh"}</Text>
+                </Pressable>
+                <Pressable style={s.dayRemoveBtn} onPress={() => confirmRemoveWeeklyItem(i, "mainId")}>
+                  <Ionicons name="trash-outline" size={14} color={tc("#6B4A3C")} />
+                  <Text style={s.dayRemoveTxt}>{tr ? "Kaldır" : "Remove"}</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={s.weekLine}>
+              <View style={s.weekMain}>
+                <Text style={s.weekLabel}>{tr ? "Ek" : "Side"}</Text>
+                <Pressable style={s.weekRecipeTap} onPress={() => openWeekRecipe(d.side)} disabled={!d.side}>
+                  <Text numberOfLines={2} style={[s.weekRecipeText, !d.side && s.iTxtMuted]}>{d.side ? displayText(d.side.title) : "-"}</Text>
+                </Pressable>
+                {d.side ? <View style={s.diffPill}><Text style={s.diffPillTxt}>{recipeDiffLabel(d.side.prep)}</Text></View> : null}
+              </View>
+              <View style={s.weekActions}>
+                <Pressable style={s.weekActionBtn} onPress={() => refreshWeeklyItem(i, "sideId")}>
+                  <Ionicons name="refresh-outline" size={14} color={tc("#8D315B")} />
+                  <Text style={s.weekActionTxt}>{tr ? "Yenile" : "Refresh"}</Text>
+                </Pressable>
+                <Pressable style={s.dayRemoveBtn} onPress={() => confirmRemoveWeeklyItem(i, "sideId")}>
+                  <Ionicons name="trash-outline" size={14} color={tc("#6B4A3C")} />
+                  <Text style={s.dayRemoveTxt}>{tr ? "Kaldır" : "Remove"}</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={s.weekLine}>
+              <View style={s.weekMain}>
+                <Text style={s.weekLabel}>{tr ? "Salata" : "Salad"}</Text>
+                <Pressable style={s.weekRecipeTap} onPress={() => openWeekRecipe(d.salad)} disabled={!d.salad}>
+                  <Text numberOfLines={2} style={[s.weekRecipeText, !d.salad && s.iTxtMuted]}>{d.salad ? displayText(d.salad.title) : "-"}</Text>
+                </Pressable>
+                {d.salad ? <View style={s.diffPill}><Text style={s.diffPillTxt}>{recipeDiffLabel(d.salad.prep)}</Text></View> : null}
+              </View>
+              <View style={s.weekActions}>
+                <Pressable style={s.weekActionBtn} onPress={() => refreshWeeklyItem(i, "saladId")}>
+                  <Ionicons name="refresh-outline" size={14} color={tc("#8D315B")} />
+                  <Text style={s.weekActionTxt}>{tr ? "Yenile" : "Refresh"}</Text>
+                </Pressable>
+                <Pressable style={s.dayRemoveBtn} onPress={() => confirmRemoveWeeklyItem(i, "saladId")}>
+                  <Ionicons name="trash-outline" size={14} color={tc("#6B4A3C")} />
+                  <Text style={s.dayRemoveTxt}>{tr ? "Kaldır" : "Remove"}</Text>
+                </Pressable>
+              </View>
+            </View>
           </View>
         ))}
         {!!weekPlan.length && <><Text style={s.section}>{tr ? "Haftalık Gerekli Malzemeler" : "Weekly Needed"}</Text>{weekNeedsMarket.map((i) => { const k = `w:${i.k}`; const ch = !!wChecks[k]; return <Pressable key={k} style={[s.iRow, ch && s.iRowA]} onPress={() => setWChecks((p) => ({ ...p, [k]: !ch }))}><Ionicons name={ch ? "checkbox" : "square-outline"} size={18} color={ch ? moduleTheme.colors.brand : moduleTheme.colors.textMuted} /><Text style={s.iTxt}>{displayText(i.name)}</Text><Text style={s.meta}>{formatQtyUnitDisplay(i.name, i.qty, i.unit)}</Text></Pressable> })}<Pressable style={s.sBtn} onPress={prepareWeeklyMissing}><Text style={s.sTxt}>{tr ? "Haftalık Eksikleri Önizle ve Markete Ekle" : "Preview Weekly Missing"}</Text></Pressable></>}
@@ -986,14 +1028,44 @@ const s = StyleSheet.create({
   },
   weekTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   weekDay: { color: moduleTheme.colors.textStrong, fontSize: 13, fontWeight: "600" },
-  weekLine: { flexDirection: "row", alignItems: "center", gap: 8 },
+  weekLine: {
+    borderWidth: 1,
+    borderColor: tc("#EDE0D7"),
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    backgroundColor: "rgba(255,255,255,0.94)",
+  },
+  weekMain: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
   weekLabel: { width: 48, color: moduleTheme.colors.textMuted, fontSize: 12, fontWeight: "600" },
-  weekRecipeTap: { flex: 1 },
+  weekRecipeTap: { flexGrow: 1, flexShrink: 1, minWidth: 120 },
+  weekRecipeText: { color: tc("#3F2D24"), fontSize: 14, fontWeight: "600", flexShrink: 1 },
+  weekActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginTop: 8 },
   iTxtMuted: { opacity: 0.55 },
-  weekActionBtn: { borderWidth: 1, borderColor: tc("#F4BED6"), backgroundColor: tc("#FFEAF3"), borderRadius: 999, paddingHorizontal: 8, paddingVertical: 4 },
-  weekActionTxt: { color: tc("#8D315B"), fontSize: 11, fontWeight: "600" },
-  dayRemoveBtn: { borderWidth: 1, borderColor: tc("#E7D2C6"), backgroundColor: tc("#F8EEE7"), borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
-  dayRemoveTxt: { color: tc("#6B4A3C"), fontSize: 11, fontWeight: "600" },
+  weekActionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderWidth: 1,
+    borderColor: tc("#F4BED6"),
+    backgroundColor: tc("#FFEAF3"),
+    borderRadius: 999,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  weekActionTxt: { color: tc("#8D315B"), fontSize: 11, fontWeight: "700" },
+  dayRemoveBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderWidth: 1,
+    borderColor: tc("#E7D2C6"),
+    backgroundColor: tc("#F8EEE7"),
+    borderRadius: 999,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  dayRemoveTxt: { color: tc("#6B4A3C"), fontSize: 11, fontWeight: "700" },
   toast: { marginTop: 10, color: tc("#7A2F4D"), fontSize: 13, fontWeight: "600" },
 })
 

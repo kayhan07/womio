@@ -1,5 +1,5 @@
-﻿import { StyleSheet, Text, View } from "react-native"
-import { tokens } from "@/src/theme/tokens"
+import { StyleSheet, Text, View } from "react-native"
+import { tokens } from "../../../theme/tokens"
 
 type Props = {
   title: string

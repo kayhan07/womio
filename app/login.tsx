@@ -1,4 +1,4 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { router } from "expo-router"
 import { useState } from "react"
 import {
@@ -15,9 +15,9 @@ import {
   useWindowDimensions,
 } from "react-native"
 import { Image as ExpoImage } from "expo-image"
-import { findMemberByEmail } from "@/src/modules/admin/system"
-import { loadAdminConfig, resolvePermissionsByRoleIds } from "@/src/modules/monetization/adminConfig"
-import { isAuthApiConfigured, loginWithApi } from "@/src/core/api/auth"
+import { findMemberByEmail, upsertMember } from "../src/modules/admin/system"
+import { loadAdminConfig, resolvePermissionsByRoleIds } from "../src/modules/monetization/adminConfig"
+import { isAuthApiConfigured, loginWithApi } from "../src/core/api/auth"
 
 const LOGIN_HERO_IMAGE = require("../assets/back.png")
 const USER_PROFILE_KEY = "womio:userProfile"
@@ -53,18 +53,25 @@ export default function Login() {
       try {
         const result = await loginWithApi({ email: emailNorm, password })
         const user = result.user
+        const nextUser = {
+          id: user.id,
+          username: user.username || emailNorm.split("@")[0],
+          email: user.email || emailNorm,
+          birthDate: user.birthDate || "",
+          isAdmin: !!user.isAdmin,
+          roleIds: user.roleIds || [],
+          permissions: user.isAdmin ? ["*"] : [],
+        }
         await AsyncStorage.setItem(
           USER_PROFILE_KEY,
-          JSON.stringify({
-            id: user.id,
-            username: user.username || emailNorm.split("@")[0],
-            email: user.email || emailNorm,
-            birthDate: user.birthDate || "",
-            isAdmin: !!user.isAdmin,
-            roleIds: user.roleIds || [],
-            permissions: user.isAdmin ? ["*"] : [],
-          })
+          JSON.stringify(nextUser)
         )
+        await upsertMember({
+          username: nextUser.username,
+          email: nextUser.email,
+          birthDate: nextUser.birthDate,
+          roleIds: nextUser.roleIds || [],
+        })
         router.replace("/(tabs)/home" as never)
         return
       } catch (error: any) {

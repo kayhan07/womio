@@ -1,4 +1,4 @@
-﻿import type { AppLanguage, TranslationMap } from "./types"
+import type { AppLanguage, TranslationMap } from "./types"
 
 export const defaultLanguage: AppLanguage = "tr"
 

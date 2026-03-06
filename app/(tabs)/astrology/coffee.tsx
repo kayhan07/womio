@@ -1,7 +1,8 @@
-﻿import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import * as ImagePicker from "expo-image-picker"
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs"
 import { useMemo, useState } from "react"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
+import { moduleStyles, moduleTheme } from "../../../src/theme/moduleStyles"
 import {
   Alert,
   Platform,
@@ -16,7 +17,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native"
-import { tc } from "@/src/theme/tokens"
+import { tc } from "../../../src/theme/tokens"
 
 
 type PickedPhoto = {
@@ -43,6 +44,56 @@ const COFFEE_READING_ENDPOINT =
 
 const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n))
 
+const toBase64FromUri = async (uri: string) => {
+  try {
+    const response = await fetch(uri)
+    const blob = await response.blob()
+    const encoded = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onerror = () => reject(new Error("file-read-failed"))
+      reader.onloadend = () => resolve(`${reader.result ?? ""}`)
+      reader.readAsDataURL(blob)
+    })
+    const i = encoded.indexOf("base64,")
+    if (i < 0) return undefined
+    return encoded.slice(i + "base64,".length)
+  } catch {
+    return undefined
+  }
+}
+
+const launchLibrarySafe = async (remaining: number) => {
+  try {
+    return await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"] as any,
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      base64: true,
+      quality: 0.9,
+    })
+  } catch {
+    return await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: (ImagePicker as any).MediaTypeOptions?.Images,
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      base64: true,
+      quality: 0.9,
+    })
+  }
+}
+
+const launchCameraSafe = async () => {
+  try {
+    return await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"] as any,
+      quality: 0.9,
+      base64: true,
+    })
+  } catch {
+    return await ImagePicker.launchCameraAsync({ quality: 0.9, base64: true })
+  }
+}
+
 const scoreCupLike = (p: PickedPhoto) => {
   // Heuristic only (no ML). Helps reject obvious non-cup photos like screenshots/very tall selfies.
   const w = p.width ?? 0
@@ -62,6 +113,7 @@ const scoreCupLike = (p: PickedPhoto) => {
 export default function AstrologyCoffeeScreen() {
   const { width } = useWindowDimensions()
   const compact = width < 360
+  const tabBarHeight = useBottomTabBarHeight()
 
   const [intention, setIntention] = useState("")
   const [photos, setPhotos] = useState<PickedPhoto[]>([])
@@ -74,6 +126,7 @@ export default function AstrologyCoffeeScreen() {
   const cupLikelyCount = useMemo(() => cupScores.filter((s) => s >= 0.55).length, [cupScores])
   const canAnalyze = photos.length >= 1
   const bottomBarHeight = compact ? 86 : 92
+  const bottomBarOffset = Math.max(12, tabBarHeight + 6)
 
   const ensurePermissions = async (mode: "camera" | "library") => {
     if (mode === "camera") {
@@ -85,7 +138,7 @@ export default function AstrologyCoffeeScreen() {
     }
   }
 
-  const addPhotoAsset = (asset: ImagePicker.ImagePickerAsset, from: PickedPhoto["from"]) => {
+  const addPhotoAsset = async (asset: ImagePicker.ImagePickerAsset, from: PickedPhoto["from"]) => {
     setPhotos((prev) => {
       if (prev.length >= 3) return prev
       const next: PickedPhoto = {
@@ -98,6 +151,13 @@ export default function AstrologyCoffeeScreen() {
       }
       return [...prev, next].slice(0, 3)
     })
+    if (!asset.base64 && asset.uri) {
+      const b64 = await toBase64FromUri(asset.uri)
+      if (!b64) return
+      setPhotos((prev) =>
+        prev.map((p) => (p.uri === asset.uri && !p.base64 ? { ...p, base64: b64 } : p))
+      )
+    }
   }
 
   const pickFromLibrary = async () => {
@@ -106,15 +166,11 @@ export default function AstrologyCoffeeScreen() {
       const remaining = Math.max(0, 3 - photos.length)
       if (remaining === 0) return
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
-        selectionLimit: remaining,
-        base64: true,
-        quality: 0.9,
-      })
+      const result = await launchLibrarySafe(remaining)
       if (result.canceled) return
-      result.assets.slice(0, remaining).forEach((a) => addPhotoAsset(a, "library"))
+      for (const a of result.assets.slice(0, remaining)) {
+        await addPhotoAsset(a, "library")
+      }
     } catch (e) {
       if (`${e}`.includes("library-permission")) {
         Alert.alert("\u0130zin Gerekli", "Galeriden foto\u011fraf se\u00e7mek i\u00e7in izin vermen gerekiyor.")
@@ -130,10 +186,10 @@ export default function AstrologyCoffeeScreen() {
       const remaining = Math.max(0, 3 - photos.length)
       if (remaining === 0) return
 
-      const result = await ImagePicker.launchCameraAsync({ quality: 0.9, base64: true })
+      const result = await launchCameraSafe()
       if (result.canceled) return
       const a = result.assets[0]
-      if (a) addPhotoAsset(a, "camera")
+      if (a) await addPhotoAsset(a, "camera")
     } catch (e) {
       if (`${e}`.includes("camera-permission")) {
         Alert.alert("\u0130zin Gerekli", "Kamera ile foto\u011fraf \u00e7ekmek i\u00e7in izin vermen gerekiyor.")
@@ -266,7 +322,7 @@ export default function AstrologyCoffeeScreen() {
         contentContainerStyle={[
           styles.page,
           compact && styles.pageCompact,
-          { paddingBottom: bottomBarHeight + 22 },
+          { paddingBottom: bottomBarHeight + bottomBarOffset + 16 },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -428,7 +484,7 @@ export default function AstrologyCoffeeScreen() {
         </View>
       </ScrollView>
 
-      <View style={[styles.bottomBar, { height: bottomBarHeight }]}>
+      <View style={[styles.bottomBar, { height: bottomBarHeight, bottom: bottomBarOffset }]}>
         <View style={styles.addRow}>
           <Pressable
             onPress={() => void takePhoto()}

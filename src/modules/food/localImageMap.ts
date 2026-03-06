@@ -1,4 +1,4 @@
-﻿export const FOOD_LOCAL_IMAGE_MAP: Record<string, any> = {
+export const FOOD_LOCAL_IMAGE_MAP: Record<string, any> = {
   'acai-bowl': require('../../../assets/food/acai-bowl.jpg'),
   'acili-ezme': require('../../../assets/food/acili-ezme.jpg'),
   'akdeniz-salata': require('../../../assets/food/akdeniz-salata.jpg'),

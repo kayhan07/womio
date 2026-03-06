@@ -1,22 +1,24 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { Image } from "expo-image"
 import * as ImagePicker from "expo-image-picker"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
-import { t, useAppLanguage } from "@/src/core/i18n"
+import { t, useAppLanguage } from "../../../src/core/i18n"
 import {
   CHAT_CURRENT_USER_ID,
   CHAT_CURRENT_USER_NAME,
   openConversationForPost,
   sendMessageToConversation,
-} from "@/src/modules/chat/storage"
-import { loadSalePosts, loadSalesQuota, saveSalePosts, saveSalesQuota } from "@/src/modules/shopping/storage"
-import { SalePost, SalesQuota } from "@/src/modules/shopping/types"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
-import { AdSlot } from "@/src/components/monetization/AdSlot"
+} from "../../../src/modules/chat/storage"
+import { loadSalePosts, loadSalesQuota, saveSalePosts, saveSalesQuota } from "../../../src/modules/shopping/storage"
+import { SalePost, SalesQuota } from "../../../src/modules/shopping/types"
+import { moduleStyles, moduleTheme } from "../../../src/theme/moduleStyles"
+import { tc } from "../../../src/theme/tokens"
+import { AdSlot } from "../../../src/components/monetization/AdSlot"
+import { AppAvatar } from "../../../src/components/ui/AppAvatar"
+import { loadProfileAvatarConfig, normalizeAvatarConfig, ProfileAvatarConfig } from "../../../src/modules/profile/avatar"
 
 const BRAND = moduleTheme.colors.brand
 const FREE_POST_LIMIT = 5
@@ -68,6 +70,7 @@ export default function ShoppingSellScreen() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [favorites, setFavorites] = useState<string[]>([])
   const [feedback, setFeedback] = useState("")
+  const [currentAvatar, setCurrentAvatar] = useState<ProfileAvatarConfig | null>(null)
 
   const [search, setSearch] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<(typeof CATEGORIES)[number] | "Tüm">("Tüm")
@@ -107,6 +110,8 @@ export default function ShoppingSellScreen() {
         }).filter((c: CartItem) => c.postId && c.title)
         setCart(normalized)
       } catch { setCart([]) }
+      const avatar = await loadProfileAvatarConfig()
+      setCurrentAvatar(avatar)
     }
     void load()
   }, [])
@@ -204,7 +209,7 @@ export default function ShoppingSellScreen() {
     if (!allowTransfer && !allowCod) return notify("En az bir ödeme yöntemi seç.")
     if (!(await consumeQuota())) return notify("Limit dolu. Paket satın alman gerekiyor.")
     const methods: PaymentMethod[] = []; if (allowTransfer) methods.push("transfer"); if (allowCod) methods.push("cod")
-    const p: SalePost = { id: `${Date.now()}`, ownerId: CHAT_CURRENT_USER_ID, ownerName: CHAT_CURRENT_USER_NAME, category, city: city.trim() || "Antalya", title: title.trim(), brand: brand.trim(), model: model.trim(), price: price.trim(), description: desc.trim(), photos, paymentMethods: methods, qa: [], status: "active", createdAt: new Date().toISOString() }
+    const p: SalePost = { id: `${Date.now()}`, ownerId: CHAT_CURRENT_USER_ID, ownerName: CHAT_CURRENT_USER_NAME, ownerAvatar: currentAvatar ?? undefined, category, city: city.trim() || "Antalya", title: title.trim(), brand: brand.trim(), model: model.trim(), price: price.trim(), description: desc.trim(), photos, paymentMethods: methods, qa: [], status: "active", createdAt: new Date().toISOString() }
     await savePosts([p, ...posts]); setTitle(""); setBrand(""); setModel(""); setPrice(""); setDesc(""); setPhotos([]); setCategory("Diger"); setCity("Antalya"); setAllowTransfer(true); setAllowCod(false); setMode("my")
   }
 
@@ -231,8 +236,10 @@ export default function ShoppingSellScreen() {
       postTitle: post.title,
       currentUserId: CHAT_CURRENT_USER_ID,
       currentUserName: CHAT_CURRENT_USER_NAME,
+      currentUserAvatar: currentAvatar ?? undefined,
       otherUserId,
       otherUserName,
+      otherUserAvatar: post.ownerAvatar,
     })
     await sendMessageToConversation({
       conversationId: conv.id,
@@ -290,9 +297,7 @@ export default function ShoppingSellScreen() {
 
         <View style={styles.sellerCard}>
           <View style={styles.sellerHead}>
-            <View style={styles.sellerAvatar}>
-              <Ionicons name="shield-checkmark" size={18} color={moduleTheme.colors.brand} />
-            </View>
+            <View style={styles.sellerAvatar}><AppAvatar avatar={currentAvatar} name={CHAT_CURRENT_USER_NAME} size={36} /></View>
             <View style={{ flex: 1 }}>
               <Text style={styles.sellerName}>WOMIO Satici Profili</Text>
               <Text style={styles.sellerMeta}>Guvenli alisveris rozetli hesap</Text>
@@ -419,6 +424,10 @@ export default function ShoppingSellScreen() {
                 </Pressable>
                 {p.photos?.[0] ? <Image source={{ uri: p.photos[0] }} style={styles.cardImage} contentFit="cover" /> : <View style={styles.cardImageEmpty}><Text style={styles.cardImageEmptyText}>No Image</Text></View>}
                 <View style={styles.cardBody}>
+                  <View style={styles.cardOwnerRow}>
+                    <AppAvatar avatar={p.ownerAvatar ? normalizeAvatarConfig(p.ownerAvatar) : null} name={p.ownerName || "Satici"} size={24} />
+                    <Text style={styles.cardOwnerName}>{p.ownerName || "Satici"}</Text>
+                  </View>
                   <Text style={styles.cardPrice}>{p.price}</Text>
                   <Text style={styles.cardTitle}>{p.title}</Text>
                   <Text style={styles.cardMeta}>{p.category ?? "Diğer"} | {p.brand} | {p.city ?? "Antalya"}</Text>
@@ -624,6 +633,8 @@ const styles = StyleSheet.create({
   cardImageEmpty: { width: "100%", height: 120, backgroundColor: tc("#FFF4EC"), alignItems: "center", justifyContent: "center" },
   cardImageEmptyText: { color: tc("#8A6B5D"), fontSize: 10, fontWeight: "600" },
   cardBody: { padding: 8 },
+  cardOwnerRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 },
+  cardOwnerName: { color: tc("#6E5549"), fontSize: 11, fontWeight: "600" },
   cardPrice: { color: moduleTheme.colors.textStrong, fontSize: 14, fontWeight: "600" },
   cardTitle: { color: tc("#3F2B23"), fontSize: 12, fontWeight: "600", marginTop: 2 },
   cardMeta: { color: moduleTheme.colors.textMuted, fontSize: 11, marginTop: 2 },

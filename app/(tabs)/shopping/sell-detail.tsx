@@ -1,13 +1,15 @@
-﻿import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useLocalSearchParams } from "expo-router"
 import { Image } from "expo-image"
 import { useEffect, useMemo, useState } from "react"
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
-import { loadSalePosts } from "@/src/modules/shopping/storage"
-import { SalePost } from "@/src/modules/shopping/types"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { loadSalePosts } from "../../../src/modules/shopping/storage"
+import { SalePost } from "../../../src/modules/shopping/types"
+import { moduleStyles, moduleTheme } from "../../../src/theme/moduleStyles"
+import { tc } from "../../../src/theme/tokens"
+import { AppAvatar } from "../../../src/components/ui/AppAvatar"
+import { normalizeAvatarConfig } from "../../../src/modules/profile/avatar"
 
 type PaymentMethod = "transfer" | "cod"
 type Order = { id: string; postId: string; status: "pending" | "approved" | "rejected"; createdAt: string }
@@ -122,9 +124,11 @@ export default function ShoppingSellDetailScreen() {
         <View style={styles.card}>
           <Text style={styles.blockTitle}>Satici Guven Karti</Text>
           <View style={styles.sellerTop}>
-            <View style={styles.avatar}><Text style={styles.avatarText}>WK</Text></View>
+            <View style={styles.avatar}>
+              <AppAvatar avatar={post.ownerAvatar ? normalizeAvatarConfig(post.ownerAvatar) : null} name={post.ownerName || "Satici"} size={44} />
+            </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.sellerName}>WOMIO Satici</Text>
+              <Text style={styles.sellerName}>{post.ownerName || "WOMIO Satici"}</Text>
               <Text style={styles.sellerSub}>Son aktif: {new Date(lastActiveAt).toLocaleDateString("tr-TR")}</Text>
             </View>
             <View style={[styles.verifyPill, isVerifiedSeller && styles.verifyPillOn]}>
@@ -189,8 +193,7 @@ const styles = StyleSheet.create({
   trustBadgeTextOn: { color: tc("#2B7A4B") },
   blockTitle: { fontSize: 16, lineHeight: 22, fontWeight: "600", color: tc("#3F2B23"), marginBottom: 8 },
   sellerTop: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 },
-  avatar: { width: 44, height: 44, borderRadius: 999, backgroundColor: tc("#FFE9F2"), borderWidth: 1, borderColor: tc("#F5C7DB"), alignItems: "center", justifyContent: "center" },
-  avatarText: { color: tc("#7A2D4F"), fontWeight: "600" },
+  avatar: { width: 44, height: 44, borderRadius: 999, alignItems: "center", justifyContent: "center" },
   sellerName: { color: tc("#3F2B23"), fontSize: 15, fontWeight: "600" },
   sellerSub: { color: tc("#7A5B4E"), fontSize: 11, marginTop: 2, fontWeight: "600" },
   verifyPill: { borderRadius: 999, borderWidth: 1, borderColor: tc("#E9DCD1"), backgroundColor: tc("#FFF"), flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 5 },

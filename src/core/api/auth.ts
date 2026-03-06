@@ -25,7 +25,8 @@ const requestJson = async (path: string, init?: RequestInit) => {
   })
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
-    throw new Error(`${data?.error || "request failed"}`)
+    const message = [data?.error, data?.detail].filter(Boolean).join(": ")
+    throw new Error(`${message || "request failed"}`)
   }
   return data
 }
@@ -73,3 +74,4 @@ export const getCurrentUserFromApi = async () => {
 export const clearAuthToken = async () => {
   await AsyncStorage.removeItem(AUTH_TOKEN_KEY)
 }
+

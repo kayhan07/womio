@@ -1,7 +1,7 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Animated, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native"
 import {
   AdminConfig,
@@ -11,7 +11,7 @@ import {
   loadAdminConfig,
   resolvePermissionsByRoleIds,
   saveAdminConfig,
-} from "@/src/modules/monetization/adminConfig"
+} from "../src/modules/monetization/adminConfig"
 import {
   AdminAuditLog,
   AdminSystemStats,
@@ -25,17 +25,17 @@ import {
   setMemberRoles,
   setMemberBlocked,
   setMemberBlockedForMinutes,
-} from "@/src/modules/admin/system"
-import { SHOPPING_STORAGE_KEYS } from "@/src/modules/shopping/storage"
+} from "../src/modules/admin/system"
+import { SHOPPING_STORAGE_KEYS } from "../src/modules/shopping/storage"
 import {
   ChatConversation,
   ChatReport,
   loadConversations,
   loadReports,
   saveReports,
-} from "@/src/modules/chat/storage"
-import { moduleStyles } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+} from "../src/modules/chat/storage"
+import { moduleStyles } from "../src/theme/moduleStyles"
+import { tc } from "../src/theme/tokens"
 import {
   SupportTicketCategory,
   SupportTicketPriority,
@@ -43,7 +43,7 @@ import {
   loadSupportTickets,
   replySupportTicket,
   setSupportTicketStatus,
-} from "@/src/modules/support/storage"
+} from "../src/modules/support/storage"
 
 const ADMIN_SESSION_KEY = "womio:adminSessionV1"
 
@@ -150,11 +150,11 @@ const moduleLabels: Record<keyof AdminConfig["modules"], string> = {
   profile: "Profil",
 }
 
-const ROLE_TEMPLATES: Array<{
+const ROLE_TEMPLATES: {
   id: string
   name: string
   permissions: PermissionKey[]
-}> = [
+}[] = [
   {
     id: "moderator",
     name: "Moderatör",
@@ -265,7 +265,7 @@ export default function AdminScreen() {
   const tabScrollXRef = useRef(0)
   const undoActionRef = useRef<null | (() => Promise<void>)>(null)
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const [nextCfg, nextStats, nextMembers, nextAudit, shoppingRaw, servicesRaw, reports, conversations, tickets] =
       await Promise.all([
       loadAdminConfig(),
@@ -299,8 +299,10 @@ export default function AdminScreen() {
       createdAt: it?.createdAt ? `${it.createdAt}` : undefined,
     }))
     setCfg(nextCfg)
-    setPrevStats(stats)
-    setStats(nextStats)
+    setStats((current) => {
+      setPrevStats(current)
+      return nextStats
+    })
     setMembers(nextMembers)
     setAuditLogs(nextAudit)
     setModerationItems(
@@ -321,7 +323,7 @@ export default function AdminScreen() {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     setReportItems(mappedReports)
     setSupportTickets(tickets)
-  }
+  }, [])
 
   useEffect(() => {
     const init = async () => {
@@ -367,7 +369,7 @@ export default function AdminScreen() {
     void refresh()
     const timer = setInterval(() => void refresh(), 4000)
     return () => clearInterval(timer)
-  }, [unlocked])
+  }, [unlocked, refresh])
 
   useEffect(() => {
     const canTab = (id: AdminTab) =>
@@ -538,7 +540,7 @@ export default function AdminScreen() {
     [supportTickets]
   )
   const dashboardAlerts = useMemo(() => {
-    const alerts: Array<{ level: "high" | "medium"; text: string }> = []
+    const alerts: { level: "high" | "medium"; text: string }[] = []
     if (overdueSupportCount > 0) alerts.push({ level: "high", text: `${overdueSupportCount} destek talebi SLA aştı.` })
     if (stats.membersBlocked > 20) alerts.push({ level: "medium", text: `Engelli üye sayısı yüksek: ${stats.membersBlocked}` })
     if (stats.reports > 0) alerts.push({ level: "medium", text: `Açık rapor sayısı: ${stats.reports}` })
@@ -1051,7 +1053,7 @@ export default function AdminScreen() {
   const importRolesJson = () => {
     if (!hasPermission("admin.roles.manage")) return
     try {
-      const parsed = JSON.parse(roleTransferJson) as Array<{ id?: string; name?: string; permissions?: string[] }>
+      const parsed = JSON.parse(roleTransferJson) as { id?: string; name?: string; permissions?: string[] }[]
       if (!Array.isArray(parsed)) throw new Error("invalid")
       const nextRoles: RoleDefinition[] = parsed
         .filter((r) => !!r?.id && !!r?.name)
@@ -2048,10 +2050,10 @@ export default function AdminScreen() {
               <Text style={styles.slotTitle}>Rol Import / Export</Text>
               <View style={styles.inlineRowWrap}>
                 <Pressable style={styles.actionBtn} onPress={exportRolesJson}>
-                  <Text style={styles.actionText}>Rolleri JSON'a Çıkar</Text>
+                  <Text style={styles.actionText}>Rolleri JSON&#39;a Çıkar</Text>
                 </Pressable>
                 <Pressable style={styles.actionBtn} onPress={importRolesJson}>
-                  <Text style={styles.actionText}>JSON'dan Yükle</Text>
+                  <Text style={styles.actionText}>JSON&#39;dan Yükle</Text>
                 </Pressable>
               </View>
               <TextInput
@@ -2198,7 +2200,7 @@ export default function AdminScreen() {
         {tab === "modules" && hasPermission("admin.modules.manage") && (
           <View style={[styles.card, compactUi && styles.cardCompactUi]}>
             <SectionTitle icon="layers-outline" text="Modül Yönetimi" />
-            {(Object.keys(cfg.modules) as Array<keyof AdminConfig["modules"]>).map((k) => (
+            {(Object.keys(cfg.modules) as (keyof AdminConfig["modules"])[]).map((k) => (
               <View key={k} style={styles.switchRow}>
                 <Text style={styles.label}>{moduleLabels[k]}</Text>
                 <Switch value={cfg.modules[k]} onValueChange={(v) => setCfg((p) => ({ ...p, modules: { ...p.modules, [k]: v } }))} />
@@ -2214,7 +2216,7 @@ export default function AdminScreen() {
               <Text style={styles.label}>Global Reklam</Text>
               <Switch value={cfg.adsEnabled} onValueChange={(v) => setCfg((p) => ({ ...p, adsEnabled: v }))} />
             </View>
-            {(Object.keys(cfg.placements) as Array<keyof AdminConfig["placements"]>).map((k) => (
+            {(Object.keys(cfg.placements) as (keyof AdminConfig["placements"])[]).map((k) => (
               <View key={k} style={styles.slotBox}>
                 <Text style={styles.slotTitle}>{placementLabels[k]}</Text>
                 <View style={styles.switchRow}>

@@ -1,5 +1,5 @@
-﻿import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native"
-import { tokens } from "@/src/theme/tokens"
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native"
+import { tokens } from "../../theme/tokens"
 
 type PremiumCardProps = {
   children: React.ReactNode

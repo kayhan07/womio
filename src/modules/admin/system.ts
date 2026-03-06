@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { CHAT_CONVERSATIONS_KEY, CHAT_MESSAGES_KEY, CHAT_REPORTS_KEY } from "@/src/modules/chat/storage"
-import { SHOPPING_STORAGE_KEYS } from "@/src/modules/shopping/storage"
+import { CHAT_CONVERSATIONS_KEY, CHAT_MESSAGES_KEY, CHAT_REPORTS_KEY } from "../chat/storage"
+import { SHOPPING_STORAGE_KEYS } from "../shopping/storage"
+import { AUTH_TOKEN_KEY, isAuthApiConfigured } from "../../core/api/auth"
 
 export const WOMIO_MEMBERS_KEY = "womio:membersV1"
 export const ADMIN_AUDIT_LOGS_KEY = "womio:adminAuditLogsV1"
@@ -62,6 +63,50 @@ const safeParse = <T>(raw: string | null, fallback: T): T => {
 }
 
 export const loadMembers = async (): Promise<WomioMember[]> => {
+  const apiBase = `${process.env.EXPO_PUBLIC_API_BASE_URL ?? ""}`.trim().replace(/\/+$/, "")
+  if (isAuthApiConfigured() && apiBase) {
+    try {
+      const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY)
+      if (token) {
+        const response = await fetch(`${apiBase}/admin/members`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        if (response.ok) {
+          const data = await response.json().catch(() => ({}))
+          const users = Array.isArray(data?.users) ? data.users : []
+          const members = users
+            .map((u: any, idx: number) => ({
+              id: `${u?.id ?? `member-${idx}`}`,
+              username: `${u?.username ?? ""}`.trim(),
+              email: `${u?.email ?? ""}`.trim().toLowerCase(),
+              fullName: u?.fullName ? `${u.fullName}` : undefined,
+              country: u?.country ? `${u.country}` : undefined,
+              city: u?.city ? `${u.city}` : undefined,
+              birthDate: u?.birthDate ? `${u.birthDate}` : undefined,
+              phone: u?.phone ? `${u.phone}` : undefined,
+              roleIds: Array.isArray(u?.roleIds)
+                ? u.roleIds.map((x: unknown) => `${x}`.trim().toLowerCase()).filter((x: string) => x.length > 0)
+                : [],
+              createdAt: `${u?.createdAt ?? new Date().toISOString()}`,
+              blocked: Boolean(u?.blocked),
+              blockedReason: u?.blockedReason ? `${u.blockedReason}` : undefined,
+              blockedAt: u?.blockedAt ? `${u.blockedAt}` : undefined,
+              blockedUntil: u?.blockedUntil ? `${u.blockedUntil}` : undefined,
+            }))
+            .filter((m: WomioMember) => m.email.length > 0)
+          await saveMembers(members)
+          return members
+        }
+      }
+    } catch {
+      // Fallback to local cache if API is unavailable.
+    }
+  }
+
   const [raw, currentRaw, detailsRaw] = await Promise.all([
     AsyncStorage.getItem(WOMIO_MEMBERS_KEY),
     AsyncStorage.getItem("womio:userProfile"),
@@ -247,7 +292,12 @@ export const loadAdminSystemStats = async (): Promise<AdminSystemStats> => {
   const raw = await AsyncStorage.multiGet(keys)
   const map = new Map(raw)
 
-  const members = safeParse<WomioMember[]>(map.get(WOMIO_MEMBERS_KEY) ?? null, [])
+  let members = safeParse<WomioMember[]>(map.get(WOMIO_MEMBERS_KEY) ?? null, [])
+  if (isAuthApiConfigured()) {
+    try {
+      members = await loadMembers()
+    } catch {}
+  }
   const shoppingPosts = safeParse<any[]>(map.get(SHOPPING_STORAGE_KEYS.sales) ?? null, [])
   const shoppingExperiences = safeParse<any[]>(map.get(SHOPPING_STORAGE_KEYS.experiences) ?? null, [])
   const shoppingMarketItems = safeParse<any[]>(map.get(SHOPPING_STORAGE_KEYS.market) ?? null, [])

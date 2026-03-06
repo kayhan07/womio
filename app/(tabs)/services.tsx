@@ -1,20 +1,22 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons } from "@expo/vector-icons"
 import { Image } from "expo-image"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "expo-router"
 import { Animated, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
-import { useAppLanguage } from "@/src/core/i18n"
-import type { AppLanguage } from "@/src/core/i18n/types"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
+import { useAppLanguage } from "../../src/core/i18n"
+import type { AppLanguage } from "../../src/core/i18n/types"
+import { moduleStyles, moduleTheme } from "../../src/theme/moduleStyles"
+import { AppAvatar } from "../../src/components/ui/AppAvatar"
 import {
   CHAT_CURRENT_USER_ID,
   CHAT_CURRENT_USER_NAME,
   openConversationForPost,
   sendMessageToConversation,
-} from "@/src/modules/chat/storage"
-import { tc } from "@/src/theme/tokens"
-import { cardMotionStyle, ensureEnterAnimArray, runStaggerEnter } from "@/src/ui/motion"
+} from "../../src/modules/chat/storage"
+import { tc } from "../../src/theme/tokens"
+import { cardMotionStyle, ensureEnterAnimArray, runStaggerEnter } from "../../src/ui/motion"
+import { loadProfileAvatarConfig, normalizeAvatarConfig, ProfileAvatarConfig } from "../../src/modules/profile/avatar"
 
 const BRAND = moduleTheme.colors.brand
 const HERO = "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1400&q=80"
@@ -31,6 +33,11 @@ type ServicePost = {
   id: string
   ownerId?: string
   ownerName?: string
+  ownerAvatar?: {
+    mode: "photo" | "preset"
+    photoUri?: string
+    presetId?: string
+  }
   title: string
   description: string
   category: ServiceCategory
@@ -351,6 +358,14 @@ export default function ServicesScreen() {
   const router = useRouter()
   const { language, ready } = useAppLanguage()
   const l = I18N[language]
+  const photoLabText =
+    language === "tr"
+      ? { title: "Fotoğraf Shoplama", desc: "Yüz fotoğrafını düzenle, indir ve sosyal medyada paylaş." }
+      : language === "de"
+        ? { title: "Foto Studio", desc: "Bearbeite dein Gesichtsfoto und teile es direkt." }
+        : language === "ru"
+          ? { title: "Фото студия", desc: "Редактируй фото лица и сразу делись." }
+          : { title: "Photo Studio", desc: "Edit your face photo, download and share it." }
   const [mode, setMode] = useState<Mode>("discover")
   const [posts, setPosts] = useState<ServicePost[]>([])
   const [quota, setQuota] = useState<ServicesQuota>({ freeUsed: 0, paidCredits: 0, purchases: [] })
@@ -373,6 +388,7 @@ export default function ServicesScreen() {
   const [listingType, setListingType] = useState<ListingType>("job")
   const [questionInput, setQuestionInput] = useState("")
   const [answerInputs, setAnswerInputs] = useState<Record<string, string>>({})
+  const [currentAvatar, setCurrentAvatar] = useState<ProfileAvatarConfig | null>(null)
 
   const notify = (value: string) => {
     setFeedback(value)
@@ -404,6 +420,13 @@ export default function ServicesScreen() {
                 id: `${p?.id ?? `svc-${Date.now()}-${idx}`}`,
                 ownerId: `${p?.ownerId ?? ""}`.trim() || undefined,
                 ownerName: `${p?.ownerName ?? ""}`.trim() || undefined,
+                ownerAvatar: p?.ownerAvatar
+                  ? {
+                      mode: p.ownerAvatar.mode === "photo" ? "photo" : "preset",
+                      photoUri: p.ownerAvatar.photoUri ? `${p.ownerAvatar.photoUri}` : undefined,
+                      presetId: p.ownerAvatar.presetId ? `${p.ownerAvatar.presetId}` : undefined,
+                    }
+                  : undefined,
                 title: `${p?.title ?? ""}`.trim(),
                 description: `${p?.description ?? ""}`.trim(),
                 category: p?.category === "childcare" ? "childcare" : p?.category === "eldercare" ? "eldercare" : "cleaning",
@@ -445,6 +468,7 @@ export default function ServicesScreen() {
       }
       setPosts(loadedPosts)
       setQuota(loadedQuota)
+      setCurrentAvatar(await loadProfileAvatarConfig())
     }
     void load()
   }, [])
@@ -521,6 +545,7 @@ export default function ServicesScreen() {
       id: `svc-${Date.now()}`,
       ownerId: CHAT_CURRENT_USER_ID,
       ownerName: CHAT_CURRENT_USER_NAME,
+      ownerAvatar: currentAvatar ?? undefined,
       title: title.trim(),
       description: description.trim(),
       category,
@@ -568,8 +593,10 @@ export default function ServicesScreen() {
       postTitle: post.title,
       currentUserId: CHAT_CURRENT_USER_ID,
       currentUserName: CHAT_CURRENT_USER_NAME,
+      currentUserAvatar: currentAvatar ?? undefined,
       otherUserId,
       otherUserName,
+      otherUserAvatar: post.ownerAvatar,
     })
     await sendMessageToConversation({
       conversationId: conv.id,
@@ -605,8 +632,10 @@ export default function ServicesScreen() {
       postTitle: post.title,
       currentUserId: CHAT_CURRENT_USER_ID,
       currentUserName: CHAT_CURRENT_USER_NAME,
+      currentUserAvatar: currentAvatar ?? undefined,
       otherUserId,
       otherUserName,
+      otherUserAvatar: post.ownerAvatar,
     })
     await sendMessageToConversation({
       conversationId: conv.id,
@@ -645,6 +674,16 @@ export default function ServicesScreen() {
           <Text style={styles.heroSubtitle}>{l.subtitle}</Text>
           <Text style={styles.heroMeta}>{l.freeLeft}: {freeLeft} | {l.paidCredits}: {quota.paidCredits}</Text>
         </View>
+        <Pressable style={styles.photoLabCard} onPress={() => router.push("/photo-lab" as any)}>
+          <View style={styles.photoLabIcon}>
+            <Ionicons name="sparkles-outline" size={16} color={tc("#FFFFFF")} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.photoLabTitle}>{photoLabText.title}</Text>
+            <Text style={styles.photoLabDesc}>{photoLabText.desc}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={tc("#8C3F66")} />
+        </Pressable>
 
         <View style={styles.modeRow}>
           {([
@@ -691,7 +730,13 @@ export default function ServicesScreen() {
                   <View pointerEvents="none" style={styles.cardGradientBottom} />
                   <View pointerEvents="none" style={styles.cardShine} />
                   <View style={styles.cardTop}>
-                    <Text style={styles.cardTitle}>{p.title}</Text>
+                    <View style={styles.cardOwnerWrap}>
+                      <AppAvatar avatar={p.ownerAvatar ? normalizeAvatarConfig(p.ownerAvatar) : null} name={p.ownerName || "İlan Sahibi"} size={24} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.cardTitle}>{p.title}</Text>
+                        <Text style={styles.cardOwnerName}>{p.ownerName || "İlan Sahibi"}</Text>
+                      </View>
+                    </View>
                     <View style={[styles.statusPill, p.status === "closed" && styles.statusPillClosed]}>
                       <Text style={[styles.statusText, p.status === "closed" && styles.statusTextClosed]}>{p.status === "active" ? l.active : l.closed}</Text>
                     </View>
@@ -769,7 +814,13 @@ export default function ServicesScreen() {
                 <View pointerEvents="none" style={styles.cardGradientBottom} />
                 <View pointerEvents="none" style={styles.cardShine} />
                 <View style={styles.cardTop}>
-                  <Text style={styles.cardTitle}>{p.title}</Text>
+                  <View style={styles.cardOwnerWrap}>
+                    <AppAvatar avatar={p.ownerAvatar ? normalizeAvatarConfig(p.ownerAvatar) : null} name={p.ownerName || "İlan Sahibi"} size={24} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.cardTitle}>{p.title}</Text>
+                      <Text style={styles.cardOwnerName}>{p.ownerName || "İlan Sahibi"}</Text>
+                    </View>
+                  </View>
                   <View style={[styles.statusPill, p.status === "closed" && styles.statusPillClosed]}>
                     <Text style={[styles.statusText, p.status === "closed" && styles.statusTextClosed]}>{p.status === "active" ? l.active : l.closed}</Text>
                   </View>
@@ -809,7 +860,13 @@ export default function ServicesScreen() {
         {!!detailPost && (
           <View style={styles.detailPanel}>
             <View style={styles.detailPanelTop}>
-              <Text style={styles.detailTitle}>{detailPost.title}</Text>
+              <View style={styles.detailOwnerWrap}>
+                <AppAvatar avatar={detailPost.ownerAvatar ? normalizeAvatarConfig(detailPost.ownerAvatar) : null} name={detailPost.ownerName || "İlan Sahibi"} size={28} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.detailTitle}>{detailPost.title}</Text>
+                  <Text style={styles.cardOwnerName}>{detailPost.ownerName || "İlan Sahibi"}</Text>
+                </View>
+              </View>
               <Pressable style={styles.removeAction} onPress={() => setDetailPostId(null)}>
                 <Text style={styles.removeActionText}>{l.closeDetail}</Text>
               </Pressable>
@@ -875,6 +932,28 @@ const styles = StyleSheet.create({
   heroTitle: { color: tc("#4A342A"), fontSize: 20, fontWeight: "600" },
   heroSubtitle: { color: tc("#6E5549"), fontSize: 12, marginTop: 5, lineHeight: 18 },
   heroMeta: { color: tc("#7A2D4F"), fontSize: 12, marginTop: 8, fontWeight: "600" },
+  photoLabCard: {
+    marginBottom: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,0,102,0.32)",
+    backgroundColor: "rgba(255,0,102,0.10)",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  photoLabIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: tc("#FF007A"),
+  },
+  photoLabTitle: { color: tc("#5A3148"), fontSize: 13, fontWeight: "700" },
+  photoLabDesc: { color: tc("#6E5549"), fontSize: 11, lineHeight: 15, marginTop: 2 },
   modeRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 10 },
   modeChip: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 999, borderWidth: 1, borderColor: tc("#E0CFC2"), backgroundColor: tc("#FFF9F3"), paddingHorizontal: 10, paddingVertical: 7 },
   modeChipActive: { borderColor: BRAND, backgroundColor: tc("#3A2A33") },
@@ -906,6 +985,8 @@ const styles = StyleSheet.create({
   cardGradientBottom: { ...StyleSheet.absoluteFillObject, top: "56%", bottom: 0, backgroundColor: "rgba(88,48,109,0.08)" },
   cardShine: { position: "absolute", top: -30, right: -22, width: 96, height: 96, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.18)" },
   cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  cardOwnerWrap: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8 },
+  cardOwnerName: { color: tc("#7A5B4E"), fontSize: 11, marginTop: 2, fontWeight: "600" },
   cardTitle: { flex: 1, color: tc("#4A342A"), fontSize: 14, fontWeight: "600" },
   statusPill: { borderRadius: 999, borderWidth: 1, borderColor: "rgba(28,165,100,0.28)", backgroundColor: "rgba(28,165,100,0.12)", paddingHorizontal: 8, paddingVertical: 4 },
   statusPillClosed: { borderColor: "rgba(255,0,102,0.36)", backgroundColor: "rgba(255,0,102,0.14)" },
@@ -926,6 +1007,7 @@ const styles = StyleSheet.create({
   feedback: { color: tc("#7A2D4F"), fontSize: 12, marginTop: 8, fontWeight: "600" },
   detailPanel: { marginTop: 10, borderRadius: 12, borderWidth: 1, borderColor: tc("#E4D2C4"), backgroundColor: tc("#FFFDF9"), padding: 10 },
   detailPanelTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 },
+  detailOwnerWrap: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8 },
   detailTitle: { flex: 1, color: tc("#4A342A"), fontSize: 15, fontWeight: "600" },
   qaCard: { marginTop: 6, borderRadius: 10, borderWidth: 1, borderColor: tc("#E4D2C4"), backgroundColor: tc("#FFF9F3"), padding: 8 },
   qaQ: { color: tc("#4A342A"), fontSize: 12, fontWeight: "600" },

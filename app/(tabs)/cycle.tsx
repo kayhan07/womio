@@ -1,8 +1,8 @@
-﻿import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import { ImageBackground, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native"
-import { t, useAppLanguage } from "@/src/core/i18n"
-import { moduleStyles } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { t, useAppLanguage } from "../../src/core/i18n"
+import { moduleStyles } from "../../src/theme/moduleStyles"
+import { tc } from "../../src/theme/tokens"
 
 const CYCLE_HERO_IMAGE_URI = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
 const CYCLE_CARD_IMAGE_URI = "https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=1200&q=80"
@@ -26,9 +26,9 @@ export default function Cycle() {
             <Ionicons name="calendar" size={14} color={tc("#5E4032")} />
             <Text style={styles.badgeText}>{t("tabHealth", language)}</Text>
           </View>
-          <Text style={[styles.title, compact && styles.titleCompact]}>Regl ve DÃ¶ngÃ¼ Takibi</Text>
+          <Text style={[styles.title, compact && styles.titleCompact]}>Regl ve Döngü Takibi</Text>
           <Text style={[styles.subtitle, compact && styles.subtitleCompact]}>
-            Bu ekran yakÄ±nda saÄŸlÄ±k modÃ¼lÃ¼ndeki dÃ¶ngÃ¼ takibi ile birleÅŸtirilecek.
+            Bu ekran yakında sağlık modülündeki döngü takibi ile birleştirilecek.
           </Text>
         </View>
 
@@ -39,7 +39,7 @@ export default function Cycle() {
           <View pointerEvents="none" style={styles.bgOverlaySoft} />
           <Text style={[styles.cardTitle, compact && styles.cardTitleCompact]}>Planlanan Alanlar</Text>
           <Text style={[styles.item, compact && styles.itemCompact]}>- Son adet tarihi ve tahmini sonraki tarih</Text>
-          <Text style={[styles.item, compact && styles.itemCompact]}>- Hamile kalma olasÄ±lÄ±ÄŸÄ± yÃ¼ksek gÃ¼nler</Text>
+          <Text style={[styles.item, compact && styles.itemCompact]}>- Hamile kalma olasılığı yüksek günler</Text>
           <Text style={[styles.item, compact && styles.itemCompact]}>- Bildirim ve takvim senkronu</Text>
         </View>
       </View>

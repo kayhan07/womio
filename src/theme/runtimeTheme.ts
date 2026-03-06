@@ -1,5 +1,5 @@
-import type { AppearanceMode } from "@/src/theme/appearance"
-import { tokens } from "@/src/theme/tokens"
+import type { AppearanceMode } from "./appearance"
+import { tokens } from "./tokens"
 
 const lightPalette = {
   colors: {

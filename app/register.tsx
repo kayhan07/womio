@@ -1,4 +1,4 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { router } from "expo-router"
 import { useState } from "react"
 import {
@@ -12,9 +12,9 @@ import {
   View,
   useWindowDimensions,
 } from "react-native"
-import { upsertMember } from "@/src/modules/admin/system"
-import { loadAdminConfig } from "@/src/modules/monetization/adminConfig"
-import { isAuthApiConfigured, registerWithApi } from "@/src/core/api/auth"
+import { upsertMember } from "../src/modules/admin/system"
+import { loadAdminConfig } from "../src/modules/monetization/adminConfig"
+import { isAuthApiConfigured, registerWithApi } from "../src/core/api/auth"
 
 const REGISTER_HERO_IMAGE_URI = "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80"
 const USER_PROFILE_KEY = "womio:userProfile"
@@ -74,6 +74,16 @@ export default function Register() {
         await Promise.all([
           AsyncStorage.setItem(USER_PROFILE_KEY, JSON.stringify(nextUser)),
           AsyncStorage.setItem(PROFILE_DETAILS_STORAGE_KEY, JSON.stringify(nextDetails)),
+          upsertMember({
+            username: nextUser.username,
+            email: nextUser.email,
+            fullName: fullName.trim(),
+            country: country.trim(),
+            city: city.trim(),
+            birthDate: nextUser.birthDate,
+            phone: phone.trim(),
+            roleIds: nextUser.roleIds || [],
+          }),
         ])
         router.replace("/(tabs)/home")
         return

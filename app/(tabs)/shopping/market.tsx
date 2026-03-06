@@ -1,4 +1,4 @@
-﻿import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import { useEffect, useMemo, useState } from "react"
 import {
   ImageBackground,
@@ -13,12 +13,12 @@ import {
   View,
   useWindowDimensions,
 } from "react-native"
-import { t, useAppLanguage } from "@/src/core/i18n"
-import { loadMarketItems, loadMarketReceipts, saveMarketItems, saveMarketReceipts } from "@/src/modules/shopping/storage"
-import { MarketItem, MarketReceipt } from "@/src/modules/shopping/types"
-import { SectionHeader } from "@/src/modules/shopping/ui/SectionHeader"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { t, useAppLanguage } from "../../../src/core/i18n"
+import { loadMarketItems, loadMarketReceipts, saveMarketItems, saveMarketReceipts } from "../../../src/modules/shopping/storage"
+import { MarketItem, MarketReceipt } from "../../../src/modules/shopping/types"
+import { SectionHeader } from "../../../src/modules/shopping/ui/SectionHeader"
+import { moduleStyles, moduleTheme } from "../../../src/theme/moduleStyles"
+import { tc } from "../../../src/theme/tokens"
 
 const BRAND = moduleTheme.colors.brand
 const MARKET_BG_URI =
@@ -33,38 +33,38 @@ const parseNumber = (raw: string) => {
 const normalizeProductName = (raw: string) => raw.trim().toLocaleLowerCase("tr-TR")
 const norm = (raw: string) => raw.trim().toLocaleLowerCase("tr-TR")
 const TR_WORD_FIXES: Record<string, string> = {
-  corbasi: "Ã§orbasÄ±",
-  corba: "Ã§orba",
-  sogan: "soÄŸan",
-  sarmisak: "sarÄ±msak",
-  patlican: "patlÄ±can",
-  yogurt: "yoÄŸurt",
-  suzme: "sÃ¼zme",
-  kasar: "kaÅŸar",
-  kiyma: "kÄ±yma",
-  yesil: "yeÅŸil",
-  kirmizi: "kÄ±rmÄ±zÄ±",
-  havuc: "havuÃ§",
-  misir: "mÄ±sÄ±r",
-  feslegen: "fesleÄŸen",
-  cilek: "Ã§ilek",
-  eksisi: "ekÅŸisi",
-  zeytinyagli: "zeytinyaÄŸlÄ±",
-  firin: "fÄ±rÄ±n",
-  firinda: "fÄ±rÄ±nda",
-  bugulama: "buÄŸulama",
-  acili: "acÄ±lÄ±",
-  yapimi: "yapÄ±mÄ±",
-  karisik: "karÄ±ÅŸÄ±k",
-  kisir: "kÄ±sÄ±r",
-  kahvalti: "kahvaltÄ±",
-  tabagi: "tabaÄŸÄ±",
+  corbasi: "çorbası",
+  corba: "çorba",
+  sogan: "soğan",
+  sarmisak: "sarımsak",
+  patlican: "patlıcan",
+  yogurt: "yoğurt",
+  suzme: "süzme",
+  kasar: "kaşar",
+  kiyma: "kıyma",
+  yesil: "yeşil",
+  kirmizi: "kırmızı",
+  havuc: "havuç",
+  misir: "mısır",
+  feslegen: "fesleğen",
+  cilek: "çilek",
+  eksisi: "ekşisi",
+  zeytinyagli: "zeytinyağlı",
+  firin: "fırın",
+  firinda: "fırında",
+  bugulama: "buğulama",
+  acili: "acılı",
+  yapimi: "yapımı",
+  karisik: "karışık",
+  kisir: "kısır",
+  kahvalti: "kahvaltı",
+  tabagi: "tabağı",
 }
-const TR_PHRASE_FIXES: Array<[string, string]> = [
-  ["didik tavuk", "tavuk gÃ¶ÄŸsÃ¼ didiklenmiÅŸ"],
-  ["kusbasi et", "dana kuÅŸbaÅŸÄ±"],
-  ["hindi", "hindi gÃ¶ÄŸÃ¼s"],
-  ["balik", "balÄ±k fileto"],
+const TR_PHRASE_FIXES: [string, string][] = [
+  ["didik tavuk", "tavuk göğsü didiklenmiş"],
+  ["kusbasi et", "dana kuşbaşı"],
+  ["hindi", "hindi göğüs"],
+  ["balik", "balık fileto"],
 ]
 const toTrTitle = (raw: string) => {
   let lowered = raw.trim().toLocaleLowerCase("tr-TR")
@@ -82,26 +82,26 @@ const toTrTitle = (raw: string) => {
 }
 const isLikelyLiquid = (name: string) => {
   const n = norm(name)
-  return n.includes("su") || n.includes("sÃ¼t") || n.includes("sut") || n.includes("yaÄŸ") || n.includes("yag") || n.includes("sirke")
+  return n.includes("su") || n.includes("süt") || n.includes("sut") || n.includes("yağ") || n.includes("yag") || n.includes("sirke")
 }
 const normalizeMarketUnit = (raw: string): "adet" | "g" | "ml" => {
   const u = norm(raw)
   if (u === "g" || u === "gr" || u === "gram") return "g"
   if (u === "ml" || u === "mililitre" || u === "mililiter") return "ml"
   if (u.includes("bardak")) return "ml"
-  if (u.includes("yemek kaÅŸÄ±") || u.includes("yemek kasi")) return "g"
-  if (u.includes("Ã§ay kaÅŸÄ±") || u.includes("cay kasi")) return "g"
+  if (u.includes("yemek kaşı") || u.includes("yemek kasi")) return "g"
+  if (u.includes("çay kaşı") || u.includes("cay kasi")) return "g"
   return "adet"
 }
 const convertLegacyAmount = (name: string, qty: number, unit: string): { qty: number; unit: "adet" | "g" | "ml" } => {
   const safeQty = Math.max(0.01, Number(qty) || 1)
   const u = norm(unit)
   if (u.includes("su barda")) return { qty: Math.max(50, Math.round(safeQty * 200)), unit: "ml" }
-  if (u.includes("yemek kaÅŸÄ±") || u.includes("yemek kasi")) {
+  if (u.includes("yemek kaşı") || u.includes("yemek kasi")) {
     if (isLikelyLiquid(name)) return { qty: Math.max(5, Math.round(safeQty * 15)), unit: "ml" }
     return { qty: Math.max(5, Math.round(safeQty * 15)), unit: "g" }
   }
-  if (u.includes("Ã§ay kaÅŸÄ±") || u.includes("cay kasi")) {
+  if (u.includes("çay kaşı") || u.includes("cay kasi")) {
     if (isLikelyLiquid(name)) return { qty: Math.max(1, Math.round(safeQty * 5)), unit: "ml" }
     return { qty: Math.max(1, Math.round(safeQty * 4)), unit: "g" }
   }
@@ -117,7 +117,7 @@ const formatQtyUnit = (name: string, qty: number, unit: string) => {
   if (unit === "g") return formatGramAsKg(qty)
   if (unit !== "adet") return `${qty} ${unit}`.trim()
   const n = norm(name)
-  const perPieceGram: Array<[string, number]> = [
+  const perPieceGram: [string, number][] = [
     ["domates", 120],
     ["sogan", 100],
     ["biber", 80],

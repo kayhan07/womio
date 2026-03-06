@@ -1,4 +1,4 @@
-﻿import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import { Image } from "expo-image"
 import * as ImagePicker from "expo-image-picker"
 import { useEffect, useMemo, useState } from "react"
@@ -10,17 +10,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
   useWindowDimensions,
 } from "react-native"
-import { t, useAppLanguage } from "@/src/core/i18n"
-import { loadExperiences, saveExperiences } from "@/src/modules/shopping/storage"
-import { Experience } from "@/src/modules/shopping/types"
-import { SectionHeader } from "@/src/modules/shopping/ui/SectionHeader"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { ModuleButton, ModuleInput } from "@/src/components/ui/ModulePrimitives"
-import { tc } from "@/src/theme/tokens"
+import { t, useAppLanguage } from "../../../src/core/i18n"
+import { loadExperiences, saveExperiences } from "../../../src/modules/shopping/storage"
+import { Experience } from "../../../src/modules/shopping/types"
+import { SectionHeader } from "../../../src/modules/shopping/ui/SectionHeader"
+import { moduleStyles, moduleTheme } from "../../../src/theme/moduleStyles"
+import { ModuleButton, ModuleInput } from "../../../src/components/ui/ModulePrimitives"
+import { tc } from "../../../src/theme/tokens"
 
 const BRAND = moduleTheme.colors.brand
 const EXPERIENCE_BG_URI =

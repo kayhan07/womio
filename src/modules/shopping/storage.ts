@@ -1,4 +1,4 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Experience, MarketItem, MarketReceipt, SalePost, SalesQuota } from "./types"
 
 const PREFIX = "shoppingCommunityV3"
@@ -85,6 +85,13 @@ export const loadSalePosts = async () =>
       id: `${it?.id ?? `s-${Date.now()}-${idx}`}`,
       ownerId: `${it?.ownerId ?? ""}`.trim() || undefined,
       ownerName: `${it?.ownerName ?? ""}`.trim() || undefined,
+      ownerAvatar: it?.ownerAvatar
+        ? {
+            mode: it.ownerAvatar.mode === "photo" ? "photo" : "preset",
+            photoUri: it.ownerAvatar.photoUri ? `${it.ownerAvatar.photoUri}`.trim() : undefined,
+            presetId: it.ownerAvatar.presetId ? `${it.ownerAvatar.presetId}`.trim() : undefined,
+          }
+        : undefined,
       category: `${it?.category ?? "Diger"}`.trim() || "Diger",
       city: `${it?.city ?? "Antalya"}`.trim() || "Antalya",
       featuredUntil: it?.featuredUntil ? `${it.featuredUntil}` : undefined,

@@ -9,7 +9,7 @@ const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, 
 
 const dynamicRequire = (name: string): any => {
   try {
-    // eslint-disable-next-line no-new-func
+     
     return Function("n", "return require(n)")(name)
   } catch {
     return null
@@ -46,7 +46,7 @@ export async function showRewardedAd(): Promise<RewardedOutcome> {
     let earned = false
     let done = false
     let revenueMicros: number | undefined
-    const unsubs: Array<() => void> = []
+    const unsubs: (() => void)[] = []
     const finish = (outcome: RewardedOutcome) => {
       if (done) return
       done = true

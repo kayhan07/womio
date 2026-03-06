@@ -1,4 +1,4 @@
-﻿import { tokens } from "@/src/theme/tokens"
+import { tokens } from "../theme/tokens"
 
 export type AppModule = {
   id: "health" | "jobs" | "shopping" | "food" | "astrology"

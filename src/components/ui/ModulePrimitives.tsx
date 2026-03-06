@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from "react-native"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
+import { moduleStyles, moduleTheme } from "../../theme/moduleStyles"
 
 type ModuleScreenProps = {
   children: React.ReactNode

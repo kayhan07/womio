@@ -1,5 +1,5 @@
-﻿import { StyleSheet } from "react-native"
-import { tokens } from "@/src/theme/tokens"
+import { StyleSheet } from "react-native"
+import { tokens } from "./tokens"
 
 export const moduleTheme = {
   colors: tokens.colors,

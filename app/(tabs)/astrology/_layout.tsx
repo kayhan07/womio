@@ -1,5 +1,5 @@
-﻿import { Stack } from "expo-router"
-import { moduleTheme } from "@/src/theme/moduleStyles"
+import { Stack } from "expo-router"
+import { moduleTheme } from "../../../src/theme/moduleStyles"
 
 export default function AstrologyLayout() {
   return (

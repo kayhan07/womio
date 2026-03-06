@@ -1,4 +1,4 @@
-﻿export type Experience = {
+export type Experience = {
   id: string
   brand: string
   model: string
@@ -36,6 +36,11 @@ export type SalePost = {
   id: string
   ownerId?: string
   ownerName?: string
+  ownerAvatar?: {
+    mode: "photo" | "preset"
+    photoUri?: string
+    presetId?: string
+  }
   category?: string
   city?: string
   featuredUntil?: string

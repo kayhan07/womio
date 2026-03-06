@@ -1,4 +1,4 @@
-﻿import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import * as ImagePicker from "expo-image-picker"
@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react"
 import {
   Alert,
   Image,
-  type ImageSourcePropType,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -16,17 +15,23 @@ import {
   View,
   useWindowDimensions,
 } from "react-native"
-import { t, useAppLanguage } from "@/src/core/i18n"
-import { languageLabels } from "@/src/core/i18n/translations"
-import type { AppLanguage } from "@/src/core/i18n/types"
-import { defaultAdminConfig, loadAdminConfig } from "@/src/modules/monetization/adminConfig"
-import { showRewardedAd } from "@/src/modules/monetization/rewarded"
-import { useAppAppearance } from "@/src/theme/appearance"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { t, useAppLanguage } from "../../src/core/i18n"
+import { languageLabels } from "../../src/core/i18n/translations"
+import type { AppLanguage } from "../../src/core/i18n/types"
+import { defaultAdminConfig, loadAdminConfig } from "../../src/modules/monetization/adminConfig"
+import { showRewardedAd } from "../../src/modules/monetization/rewarded"
+import { useAppAppearance } from "../../src/theme/appearance"
+import { moduleStyles, moduleTheme } from "../../src/theme/moduleStyles"
+import { tc } from "../../src/theme/tokens"
+import { clearAuthToken } from "../../src/core/api/auth"
+import {
+  AVATAR_PRESETS,
+  AvatarPresetId,
+  PROFILE_AVATAR_STORAGE_KEY,
+  ProfileAvatarConfig,
+} from "../../src/modules/profile/avatar"
 
 const BRAND = moduleTheme.colors.brand
-const PROFILE_AVATAR_STORAGE_KEY = "profileAvatarV1"
 const PROFILE_DETAILS_STORAGE_KEY = "profileDetailsV1"
 const USER_PROFILE_KEY = "womio:userProfile"
 const PROFILE_WALLET_STORAGE_KEY = "profileWalletV1"
@@ -34,34 +39,6 @@ const PROFILE_WALLET_REWARD_STORAGE_KEY = "profileWalletRewardV1"
 
 const languages: AppLanguage[] = ["tr", "en", "de", "ru"]
 const PROFILE_HERO_IMAGE_URI = "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80"
-
-type AvatarPreset = { id: string; source: ImageSourcePropType }
-const avatarPresets: AvatarPreset[] = [
-  {
-    id: "illustration-w1",
-    source: require("../../assets/avatars/woman1.png"),
-  },
-  {
-    id: "illustration-w2",
-    source: require("../../assets/avatars/woman2.png"),
-  },
-  {
-    id: "illustration-w3",
-    source: require("../../assets/avatars/woman3.png"),
-  },
-  {
-    id: "illustration-w4",
-    source: require("../../assets/avatars/woman4.png"),
-  },
-  {
-    id: "illustration-w5",
-    source: require("../../assets/avatars/woman5.png"),
-  },
-  {
-    id: "illustration-w6",
-    source: require("../../assets/avatars/woman6.png"),
-  },
-]
 
 type WalletEntry = { id: string; amount: number; createdAt: string }
 type WalletState = { balance: number; entries: WalletEntry[] }
@@ -81,7 +58,7 @@ export default function Profile() {
 
   const [avatarMode, setAvatarMode] = useState<"photo" | "preset">("preset")
   const [avatarPhotoUri, setAvatarPhotoUri] = useState("")
-  const [avatarPreset, setAvatarPreset] = useState(avatarPresets[0].id)
+  const [avatarPreset, setAvatarPreset] = useState<AvatarPresetId>(AVATAR_PRESETS[0].id)
 
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
@@ -103,7 +80,7 @@ export default function Profile() {
 
   const quickTopups = [50, 100, 250, 500]
   const selectedPreset = useMemo(
-    () => avatarPresets.find((x) => x.id === avatarPreset) ?? avatarPresets[0],
+    () => AVATAR_PRESETS.find((x) => x.id === avatarPreset) ?? AVATAR_PRESETS[0],
     [avatarPreset]
   )
   const birthMask = useMemo<{ order: "dmy" | "mdy"; sep: "/" | "." }>(() => {
@@ -159,8 +136,8 @@ export default function Profile() {
 
       try {
         if (avatarRaw) {
-          const a = JSON.parse(avatarRaw) as { mode?: "photo" | "preset"; photoUri?: string; presetId?: string }
-          const validPreset = avatarPresets.some((x) => x.id === a.presetId) ? a.presetId! : avatarPresets[0].id
+          const a = JSON.parse(avatarRaw) as Partial<ProfileAvatarConfig>
+          const validPreset = AVATAR_PRESETS.some((x) => x.id === a.presetId) ? a.presetId! : AVATAR_PRESETS[0].id
           setAvatarMode(a.mode === "photo" ? "photo" : "preset")
           setAvatarPhotoUri(a.photoUri || "")
           setAvatarPreset(validPreset)
@@ -236,12 +213,12 @@ export default function Profile() {
     }
   }, [])
 
-  const saveAvatar = async (next: { mode: "photo" | "preset"; photoUri?: string; presetId?: string }) => {
+  const saveAvatar = async (next: { mode: "photo" | "preset"; photoUri?: string; presetId?: AvatarPresetId }) => {
     setAvatarMode(next.mode)
     setAvatarPhotoUri(next.photoUri || "")
-    const presetId = next.presetId && avatarPresets.some((x) => x.id === next.presetId)
+    const presetId = next.presetId && AVATAR_PRESETS.some((x) => x.id === next.presetId)
       ? next.presetId
-      : avatarPresets[0].id
+      : AVATAR_PRESETS[0].id
     setAvatarPreset(presetId)
     await AsyncStorage.setItem(PROFILE_AVATAR_STORAGE_KEY, JSON.stringify({ ...next, presetId }))
   }
@@ -322,6 +299,14 @@ export default function Profile() {
     toast(lt("Profil kaydedildi.", "Profile saved.", "Profil gespeichert.", "Профиль сохранён."))
   }
 
+  const handleLogout = async () => {
+    await Promise.all([
+      AsyncStorage.removeItem(USER_PROFILE_KEY),
+      clearAuthToken(),
+    ])
+    router.replace("/login")
+  }
+
   const watchAdAndEarn = async () => {
     if (rewardLoading) return
     const current = normalizedReward
@@ -396,10 +381,10 @@ export default function Profile() {
           <View style={styles.row}>
             <Pressable style={styles.chip} onPress={() => void pickGallery()}><Text style={styles.chipText}>{lt("Galeriden Seç", "Gallery", "Galerie", "Галерея")}</Text></Pressable>
             <Pressable style={styles.chip} onPress={() => void pickCamera()}><Text style={styles.chipText}>{lt("Kamera", "Camera", "Kamera", "Kamera")}</Text></Pressable>
-            <Pressable style={styles.chip} onPress={() => void saveAvatar({ mode: "preset", presetId: avatarPresets[0].id, photoUri: "" })}><Text style={styles.chipText}>{lt("Sıfırla", "Reset", "Zurücksetzen", "Сброс")}</Text></Pressable>
+            <Pressable style={styles.chip} onPress={() => void saveAvatar({ mode: "preset", presetId: AVATAR_PRESETS[0].id, photoUri: "" })}><Text style={styles.chipText}>{lt("Sıfırla", "Reset", "Zurücksetzen", "Сброс")}</Text></Pressable>
           </View>
           <View style={styles.row}>
-            {avatarPresets.map((a) => (
+            {AVATAR_PRESETS.map((a) => (
               <Pressable key={a.id} style={[styles.avatarChip, avatarMode === "preset" && avatarPreset === a.id && styles.avatarChipActive]} onPress={() => void saveAvatar({ mode: "preset", presetId: a.id, photoUri: avatarPhotoUri })}>
                 <Image source={a.source} style={styles.avatarChipImage} />
               </Pressable>
@@ -475,6 +460,10 @@ export default function Profile() {
           </Text>
         </View>
 
+        <Pressable style={styles.logoutBtn} onPress={() => void handleLogout()}>
+          <Text style={styles.logoutBtnText}>{lt("Çıkış Yap", "Log Out", "Abmelden", "Выйти")}</Text>
+        </Pressable>
+
         {!!feedback && <Text style={styles.feedback}>{feedback}</Text>}
       </View>
     </ScrollView>
@@ -546,6 +535,18 @@ const styles = StyleSheet.create({
   bioInput: { minHeight: 80, textAlignVertical: "top" },
   saveBtn: { minHeight: 42, borderRadius: 10, backgroundColor: BRAND, alignItems: "center", justifyContent: "center", marginTop: 4 },
   saveBtnText: { color: tc("#FFF"), fontSize: 14, fontWeight: "600" },
+  logoutBtn: {
+    minHeight: 42,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: tc("#E9B3C9"),
+    backgroundColor: tc("#FFF2F7"),
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+    marginBottom: 10,
+  },
+  logoutBtnText: { color: tc("#A42A62"), fontSize: 14, fontWeight: "700" },
   disabled: { opacity: 0.5 },
   walletBalance: { color: tc("#2F2018"), fontSize: 28, fontWeight: "600", marginBottom: 8 },
   rewardBox: { marginTop: 10, borderWidth: 1, borderColor: tc("#E8D8CB"), borderRadius: 12, padding: 10, backgroundColor: tc("#FFF9F3") },

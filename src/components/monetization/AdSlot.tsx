@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 import { Ionicons } from "@expo/vector-icons"
 import { Pressable, StyleSheet, Text, View } from "react-native"
-import { AdPlacementKey, loadAdminConfig } from "@/src/modules/monetization/adminConfig"
-import { moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { AdPlacementKey, loadAdminConfig } from "../../modules/monetization/adminConfig"
+import { moduleTheme } from "../../theme/moduleStyles"
+import { tc } from "../../theme/tokens"
 
 type AdSlotProps = {
   compact?: boolean

@@ -1,4 +1,4 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 export const CHAT_CONVERSATIONS_KEY = "chatV1:conversations"
 export const CHAT_MESSAGES_KEY = "chatV1:messages"
@@ -16,6 +16,14 @@ export type ChatConversation = {
   postTitle: string
   participants: string[]
   participantNames: Record<string, string>
+  participantAvatars?: Record<
+    string,
+    {
+      mode: "photo" | "preset"
+      photoUri?: string
+      presetId?: string
+    }
+  >
   updatedAt: string
   lastMessage: string
 }
@@ -52,7 +60,31 @@ const safeParse = <T>(raw: string | null): T[] => {
 }
 
 export const loadConversations = async () =>
-  safeParse<ChatConversation>(await AsyncStorage.getItem(CHAT_CONVERSATIONS_KEY))
+  safeParse<any>(await AsyncStorage.getItem(CHAT_CONVERSATIONS_KEY)).map((c, idx) => ({
+    id: `${c?.id ?? `conv-${Date.now()}-${idx}`}`,
+    source: c?.source === "services" ? "services" : "shopping",
+    postId: `${c?.postId ?? ""}`,
+    postTitle: `${c?.postTitle ?? ""}`,
+    participants: Array.isArray(c?.participants) ? c.participants.map((x: unknown) => `${x}`) : [],
+    participantNames: c?.participantNames && typeof c.participantNames === "object"
+      ? Object.fromEntries(Object.entries(c.participantNames).map(([k, v]) => [`${k}`, `${v ?? ""}`]))
+      : {},
+    participantAvatars: c?.participantAvatars && typeof c.participantAvatars === "object"
+      ? Object.fromEntries(
+          Object.entries(c.participantAvatars)
+            .map(([k, v]: [string, any]) => [
+              `${k}`,
+              {
+                mode: v?.mode === "photo" ? "photo" : "preset",
+                photoUri: v?.photoUri ? `${v.photoUri}` : undefined,
+                presetId: v?.presetId ? `${v.presetId}` : undefined,
+              },
+            ])
+        )
+      : undefined,
+    updatedAt: `${c?.updatedAt ?? new Date().toISOString()}`,
+    lastMessage: `${c?.lastMessage ?? ""}`,
+  })) as ChatConversation[]
 
 export const saveConversations = async (next: ChatConversation[]) => {
   await AsyncStorage.setItem(CHAT_CONVERSATIONS_KEY, JSON.stringify(next))
@@ -132,8 +164,18 @@ export const openConversationForPost = async (params: {
   postTitle: string
   currentUserId: string
   currentUserName: string
+  currentUserAvatar?: {
+    mode: "photo" | "preset"
+    photoUri?: string
+    presetId?: string
+  }
   otherUserId: string
   otherUserName: string
+  otherUserAvatar?: {
+    mode: "photo" | "preset"
+    photoUri?: string
+    presetId?: string
+  }
 }) => {
   const conversations = await loadConversations()
   const id = buildConversationId(params.source, params.postId, params.currentUserId, params.otherUserId)
@@ -151,6 +193,22 @@ export const openConversationForPost = async (params: {
     participantNames: {
       [params.currentUserId]: params.currentUserName,
       [params.otherUserId]: params.otherUserName,
+    },
+    participantAvatars: {
+      [params.currentUserId]: params.currentUserAvatar
+        ? {
+            mode: params.currentUserAvatar.mode === "photo" ? "photo" : "preset",
+            photoUri: params.currentUserAvatar.photoUri ? `${params.currentUserAvatar.photoUri}` : undefined,
+            presetId: params.currentUserAvatar.presetId ? `${params.currentUserAvatar.presetId}` : undefined,
+          }
+        : { mode: "preset" },
+      [params.otherUserId]: params.otherUserAvatar
+        ? {
+            mode: params.otherUserAvatar.mode === "photo" ? "photo" : "preset",
+            photoUri: params.otherUserAvatar.photoUri ? `${params.otherUserAvatar.photoUri}` : undefined,
+            presetId: params.otherUserAvatar.presetId ? `${params.otherUserAvatar.presetId}` : undefined,
+          }
+        : { mode: "preset" },
     },
     updatedAt: now,
     lastMessage: "",

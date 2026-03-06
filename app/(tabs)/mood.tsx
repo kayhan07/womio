@@ -1,8 +1,8 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useEffect, useMemo, useState } from "react"
 import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { moduleStyles, moduleTheme } from "../../src/theme/moduleStyles"
+import { tc } from "../../src/theme/tokens"
 
 type MoodValue = "great" | "good" | "neutral" | "tired" | "stressed"
 
@@ -148,7 +148,7 @@ export default function Mood() {
           <View pointerEvents="none" style={styles.bgOverlaySoft} />
           <Text style={styles.sectionTitle}>Akilli Oneri</Text>
           <View style={styles.aiBox}>
-            <Text style={styles.aiText}>{aiSuggestion || "HenÃ¼z kayÄ±t yok. Ä°lk kaydÄ±nÄ± oluÅŸtur."}</Text>
+            <Text style={styles.aiText}>{aiSuggestion || "Henüz kayıt yok. İlk kaydını oluştur."}</Text>
           </View>
 
           <Text style={[styles.sectionTitle, styles.historyTitle]}>Gecmis kayıtlar</Text>

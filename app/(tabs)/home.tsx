@@ -1,4 +1,4 @@
-﻿import { router } from "expo-router"
+import { router } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -13,14 +13,14 @@ import {
   useWindowDimensions,
 } from "react-native"
 import { Image as ExpoImage } from "expo-image"
-import { t, useAppLanguage } from "@/src/core/i18n"
-import { moduleRegistry } from "@/src/modules/registry"
-import { SectionHeader } from "@/src/components/ui/SectionHeader"
-import { AdSlot } from "@/src/components/monetization/AdSlot"
-import { defaultAdminConfig, loadAdminConfig } from "@/src/modules/monetization/adminConfig"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
-import { cardMotionStyle, ensureEnterAnimArray, getOrCreatePressAnim, pressIn, pressOut, runStaggerEnter } from "@/src/ui/motion"
+import { t, useAppLanguage } from "../../src/core/i18n"
+import { moduleRegistry } from "../../src/modules/registry"
+import { SectionHeader } from "../../src/components/ui/SectionHeader"
+import { AdSlot } from "../../src/components/monetization/AdSlot"
+import { defaultAdminConfig, loadAdminConfig } from "../../src/modules/monetization/adminConfig"
+import { moduleStyles, moduleTheme } from "../../src/theme/moduleStyles"
+import { tc } from "../../src/theme/tokens"
+import { cardMotionStyle, ensureEnterAnimArray, getOrCreatePressAnim, pressIn, pressOut, runStaggerEnter } from "../../src/ui/motion"
 
 const BRAND = moduleTheme.colors.brand
 const HERO_BG_SOURCE = require("../../assets/back2.png")
@@ -31,6 +31,7 @@ const moduleImages: Record<string, string> = {
   shopping: "https://images.unsplash.com/photo-1579113800032-c38bd7635818?auto=format&fit=crop&w=900&q=80",
   food: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
   astrology: "https://images.unsplash.com/photo-1515942661900-94b3d1972591?auto=format&fit=crop&w=900&q=80",
+  photoLab: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80",
 }
 
 const moduleOverlays: Record<string, string> = {
@@ -39,6 +40,7 @@ const moduleOverlays: Record<string, string> = {
   shopping: "rgba(255,249,242,0.26)",
   food: "rgba(255,249,242,0.26)",
   astrology: "rgba(255,249,242,0.30)",
+  photoLab: "rgba(255,243,248,0.30)",
 }
 
 export default function Home() {
@@ -192,6 +194,43 @@ export default function Home() {
           </Pressable>
           </Animated.View>
         )})}
+
+        <Pressable
+          style={[
+            styles.card,
+            compact && styles.cardCompact,
+            { backgroundColor: tc("#FFF3F8") },
+          ]}
+          onPress={() => router.push("/(tabs)/photo-lab" as never)}
+        >
+          <View pointerEvents="none" style={styles.cardBgWrap}>
+            <ImageBackground source={{ uri: moduleImages.photoLab }} style={styles.cardBgWrap} imageStyle={styles.cardBgImage} />
+          </View>
+          <View pointerEvents="none" style={[styles.cardBgOverlay, { backgroundColor: moduleOverlays.photoLab }]} />
+          <View pointerEvents="none" style={styles.cardGradientTop} />
+          <View pointerEvents="none" style={styles.cardGradientBottom} />
+          <View pointerEvents="none" style={styles.cardShine} />
+          <View pointerEvents="none" style={styles.cardAccentTop} />
+          <View style={styles.cardRow}>
+            <View style={styles.cardLeft}>
+              <View style={styles.iconWrap}>
+                <Ionicons name="sparkles" size={19} color={moduleTheme.colors.textStrong} />
+              </View>
+              <View style={styles.cardCopy}>
+                <Text style={[styles.cardTitle, compact && styles.cardTitleCompact]}>
+                  {isTr ? "Fotoğraf Shoplama" : "Photo Studio"}
+                </Text>
+                <Text style={[styles.cardSubtitle, compact && styles.cardSubtitleCompact]}>
+                  {isTr ? "Yüz fotoğrafını AI ile düzenle, kaydet ve paylaş." : "Edit face photos with AI, save and share."}
+                </Text>
+                <Text style={styles.cardCta}>{isTr ? "Hemen Aç" : "Open Now"}</Text>
+              </View>
+            </View>
+            <View style={styles.arrowWrap}>
+              <Ionicons name="chevron-forward" size={18} color={moduleTheme.colors.textStrong} />
+            </View>
+          </View>
+        </Pressable>
 
         <AdSlot
           placementKey="homeBottom"

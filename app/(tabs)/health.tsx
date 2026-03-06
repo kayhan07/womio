@@ -1,9 +1,11 @@
-﻿import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import * as Notifications from "expo-notifications"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
+  Alert,
   Animated,
   ImageBackground,
+  PermissionsAndroid,
   Platform,
   Pressable,
   ScrollView,
@@ -19,9 +21,10 @@ import {
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { Calendar, LocaleConfig } from "react-native-calendars"
 import type { DateData } from "react-native-calendars"
-import { useAppLanguage } from "@/src/core/i18n"
-import { moduleStyles, moduleTheme } from "@/src/theme/moduleStyles"
-import { tc } from "@/src/theme/tokens"
+import { useAppLanguage } from "../../src/core/i18n"
+import { ensureCorePermissions } from "../../src/core/permissions/bootstrap"
+import { moduleStyles, moduleTheme } from "../../src/theme/moduleStyles"
+import { tc } from "../../src/theme/tokens"
 
 const STORAGE_KEY = "healthModuleV2"
 const DEFAULT_CYCLE_LENGTH = 28
@@ -234,6 +237,7 @@ type StoredData = {
   waterTargetMl?: number
   waterDailyMl?: DayValueMap
   stepsTarget?: number
+  stepsDaily?: DayValueMap
   pregnancyChecklistByDate?: PregnancyChecklistByDate
   pregnancySymptomsByDate?: PregnancySymptomsByDate
   pregnancyTestDone?: PregnancyTestDoneMap
@@ -710,36 +714,6 @@ const getPregnancyDoctorQuestions = (week: number, language: "tr" | "en" | "de" 
   if (week <= 13) return ["Kan tahlillerim beklenen aralikta mi?", "Takviyelerde degisiklik gerekiyor mu?", "Bulanti ve yorgunlugu nasil daha iyi yonetebilirim?"]
   if (week <= 27) return ["Bebegin buyumesi bu hafta icin uygun mu?", "Seker taramasi zamani geldi mi?", "Bu donemde en guvenli aktivite seviyesi nedir?"]
   return ["Dogumun yaklastigini gosteren belirtiler neler?", "Hangi durumda hemen hastaneye gitmeliyim?", "Dogum planim mevcut duruma uygun mu?"]
-}
-
-const getPregnancyMiniSuggestion = (week: number, language: "tr" | "en" | "de" | "ru") => {
-  const dayFactor = new Date().getDate() % 3
-  if (language === "en") {
-    const early = ["Drink a glass of water right after waking up.", "Choose a lighter breakfast and eat slowly.", "Take a 10-minute gentle walk today."]
-    const mid = ["Add a short stretching break for your back.", "Keep your posture soft while sitting.", "Pause for 2 minutes and breathe deeply."]
-    const late = ["Prepare one small item for your birth bag.", "Rest with side support for 15 minutes.", "Track baby movements at a calm moment."]
-    const pool = week <= 12 ? early : week <= 27 ? mid : late
-    return pool[dayFactor]
-  }
-  if (language === "de") {
-    const early = ["Nach dem Aufstehen ein Glas Wasser trinken.", "Leichtes Fruehstueck waehlen und langsam essen.", "Heute 10 Minuten sanft spazieren."]
-    const mid = ["Eine kurze Ruecken-Dehnung einbauen.", "Beim Sitzen die Haltung weich halten.", "2 Minuten ruhig und tief atmen."]
-    const late = ["Einen kleinen Punkt fuer die Kliniktasche vorbereiten.", "15 Minuten mit Seitenstuetze ausruhen.", "Bewegungen in ruhigem Moment beobachten."]
-    const pool = week <= 12 ? early : week <= 27 ? mid : late
-    return pool[dayFactor]
-  }
-  if (language === "ru") {
-    const early = ["Srazu posle probuzhdeniya vypi stakan vody.", "Vybiraysya legkiy zavtrak i esh medlenno.", "Sdelai segodnya 10 minut myagkoy progulki."]
-    const mid = ["Dobav korotkuyu rastyazhku dlya spiny.", "Derzhi myagkuyu osanku vo vremya sideniya.", "Sdelay 2 minuty glubokogo spokojnogo dyhaniya."]
-    const late = ["Podgotov odin malenkij punkt dlya sumki v rod dom.", "Otdokhni 15 minut s oporoy na bok.", "Spokoyno otsledi dvizheniya rebenka."]
-    const pool = week <= 12 ? early : week <= 27 ? mid : late
-    return pool[dayFactor]
-  }
-  const early = ["Sabah uyanınca bir bardak su iç.", "Kahvaltıyı hafif seç ve yavaş ye.", "Bugün 10 dakikalık nazik bir yürüyüş yap."]
-  const mid = ["Belin için kısa bir esneme molası ekle.", "Otururken duruşunu yumuşak tut.", "2 dakika sakin nefes egzersizi yap."]
-  const late = ["Doğum çantası için küçük bir parça hazırla.", "Yan destekle 15 dakika dinlen.", "Sakin bir anda bebek hareketlerini takip et."]
-  const pool = week <= 12 ? early : week <= 27 ? mid : late
-  return pool[dayFactor]
 }
 
 const getPregnancySafetyNote = (language: "tr" | "en" | "de" | "ru") => {
@@ -1293,6 +1267,9 @@ const healthUiText = {
     stepsTodayLine: "Bugün {steps} adım | Hedef {goal} | Kalan {left}",
     stepsGoalPlaceholder: "Günlük hedef (adım)",
     stepSunavailable: "Adım sayar bu cihazda desteklenmiyor veya izin verilmedi.",
+    stepsGrantPermission: "İzin ver ve adım sayarı aç",
+    stepsPermissionChecking: "İzin kontrol ediliyor...",
+    stepsCheckAllPermissions: "Cihaz izinlerini kontrol et",
     stepsSaved: "Adım hedefi kaydedildi.",
     stepsLiveOn: "Canlı takip aktif",
     stepsLiveOff: "Canlı takip kapalı",
@@ -1459,6 +1436,9 @@ const healthUiText = {
     stepsTodayLine: "Today {steps} steps | Goal {goal} | Left {left}",
     stepsGoalPlaceholder: "Daily goal (steps)",
     stepSunavailable: "Step counter is not available or permission is missing.",
+    stepsGrantPermission: "Grant permission and enable steps",
+    stepsPermissionChecking: "Checking permission...",
+    stepsCheckAllPermissions: "Check device permissions",
     stepsSaved: "Step goal saved.",
     stepsLiveOn: "Live tracking is active",
     stepsLiveOff: "Live tracking is off",
@@ -1625,6 +1605,9 @@ const healthUiText = {
     stepsTodayLine: "Heute {steps} Schritte | Ziel {goal} | Rest {left}",
     stepsGoalPlaceholder: "Tagesziel (Schritte)",
     stepSunavailable: "Schrittzaehler nicht verfuegbar oder keine Berechtigung.",
+    stepsGrantPermission: "Berechtigung geben und aktivieren",
+    stepsPermissionChecking: "Berechtigung wird geprueft...",
+    stepsCheckAllPermissions: "Geraete-Berechtigungen pruefen",
     stepsSaved: "Schrittziel gespeichert.",
     stepsLiveOn: "Live-Tracking ist aktiv",
     stepsLiveOff: "Live-Tracking ist aus",
@@ -1791,6 +1774,9 @@ const healthUiText = {
     stepsTodayLine: "Segodnya {steps} shagov | Tsel {goal} | Ostalos {left}",
     stepsGoalPlaceholder: "Dnevnaya tsel (shagi)",
     stepSunavailable: "Shagomer nedostupen ili net razresheniya.",
+    stepsGrantPermission: "Dat razreshenie i vklyuchit",
+    stepsPermissionChecking: "Proverka razresheniya...",
+    stepsCheckAllPermissions: "Proverit razresheniya ustroystva",
     stepsSaved: "Цель по шагам сохранена.",
     stepsLiveOn: "Onlayn-otslezhivanie aktivno",
     stepsLiveOff: "Onlayn-otslezhivanie vyklyucheno",
@@ -2038,9 +2024,13 @@ export default function Health() {
   const [stepsTarget, setStepsTarget] = useState("8000")
   const [stepsAvailable, setStepsAvailable] = useState<boolean | null>(null)
   const [stepsToday, setStepsToday] = useState(0)
+  const [stepsPermissionBusy, setStepsPermissionBusy] = useState(false)
+  const [stepsDaily, setStepsDaily] = useState<DayValueMap>({})
   const stepsBaseRef = useRef(0)
   const stepsSubRef = useRef<{ remove?: () => void } | null>(null)
   const pedometerRef = useRef<any>(null)
+  const stepsWalkerProgress = useRef(new Animated.Value(0)).current
+  const stepsPersistedRef = useRef(0)
 
   const [age, setAge] = useState("")
   const [heightCm, setHeightCm] = useState("")
@@ -2106,12 +2096,36 @@ export default function Health() {
   }, [pregnant, activeTab, pregThumbPulse])
 
   useEffect(() => {
+    if (activeTab !== "steps" || !stepsAvailable) {
+      stepsWalkerProgress.setValue(0)
+      return
+    }
+
+    const walkLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(stepsWalkerProgress, {
+          toValue: 1,
+          duration: 2200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(stepsWalkerProgress, {
+          toValue: 0,
+          duration: 2200,
+          useNativeDriver: true,
+        }),
+      ])
+    )
+
+    walkLoop.start()
+    return () => walkLoop.stop()
+  }, [activeTab, stepsAvailable, stepsWalkerProgress])
+
+  useEffect(() => {
     LocaleConfig.defaultLocale = language
   }, [language])
 
   useEffect(() => {
     if (!panicBreathing) return
-    const phaseDurations = [4, 4, 6]
     const timer = setInterval(() => {
       setPanicPhaseRemaining((prev) => {
         if (prev > 1) return prev - 1
@@ -2149,61 +2163,90 @@ export default function Health() {
     }).start()
   }, [panicPhaseIndex, panicBreathing, panicFullscreen, panicBreathScale])
 
-  useEffect(() => {
-    // Live step counter (best-effort). Web is not Supported.
+  const setupStepsTracking = useCallback(async (askPermission: boolean) => {
     if (Platform.OS === "web") {
       setStepsAvailable(false)
-      return
+      return { available: false, needsSettings: false }
     }
 
-    let cancelled = false
-    const setup = async () => {
-      try {
-        // Lazy-load to avoid bundler/lint isSues if expo-sensors is not installed yet.
-        if (!pedometerRef.current) {
-          const moduleName = "expo" + "-sensors"
-          const Sensors = await import(moduleName)
-          pedometerRef.current = (Sensors as any)?.Pedometer ?? null
-        }
-        const Pedometer = pedometerRef.current
-        if (!Pedometer) {
-          setStepsAvailable(false)
-          return
-        }
-
-        const available = await Pedometer.isAvailableAsync()
-        if (cancelled) return
-        setStepsAvailable(Boolean(available))
-        if (!available) return
-
-        const now = new Date()
-        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
-
-        const res = await Pedometer.getStepCountAsync(start, now)
-        if (cancelled) return
-
-        const base = Number(res?.steps) || 0
-        stepsBaseRef.current = base
-        setStepsToday(base)
-
-        stepsSubRef.current?.remove?.()
-        stepsSubRef.current = Pedometer.watchStepCount((r: { steps: number }) => {
-          const delta = Number(r?.steps) || 0
-          setStepsToday(stepsBaseRef.current + delta)
-        }) as unknown as { remove?: () => void }
-      } catch {
-        if (cancelled) return
-        setStepsAvailable(false)
+    setStepsPermissionBusy(true)
+    let needsSettings = false
+    try {
+      // Lazy-load to avoid bundler/lint issues if expo-sensors is missing.
+      if (!pedometerRef.current) {
+        const moduleName = "expo" + "-sensors"
+        const Sensors = await import(moduleName)
+        pedometerRef.current = (Sensors as any)?.Pedometer ?? null
       }
-    }
+      const Pedometer = pedometerRef.current
+      if (!Pedometer) {
+        setStepsAvailable(false)
+        return { available: false, needsSettings: false }
+      }
 
-    void setup()
+      const available = await Pedometer.isAvailableAsync()
+      setStepsAvailable(Boolean(available))
+      if (!available) return { available: false, needsSettings: false }
+
+      if (Platform.OS === "android") {
+        const perm = PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION
+        if (perm) {
+          const has = await PermissionsAndroid.check(perm)
+          if (!has) {
+            if (!askPermission) {
+              setStepsAvailable(false)
+              return { available: false, needsSettings: false }
+            }
+            const asked = await PermissionsAndroid.request(perm)
+            if (asked !== PermissionsAndroid.RESULTS.GRANTED) {
+              needsSettings = asked === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN
+              setStepsAvailable(false)
+              return { available: false, needsSettings }
+            }
+          }
+        }
+      } else if (Platform.OS === "ios") {
+        const requestFn = (Pedometer as any)?.requestPermissionsAsync
+        if (askPermission && typeof requestFn === "function") {
+          const p = await requestFn()
+          if (!p?.granted) {
+            setStepsAvailable(false)
+            return { available: false, needsSettings: false }
+          }
+        }
+      }
+
+      const now = new Date()
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+      const res = await Pedometer.getStepCountAsync(start, now)
+
+      const base = Number(res?.steps) || 0
+      stepsBaseRef.current = base
+      setStepsToday(base)
+
+      stepsSubRef.current?.remove?.()
+      stepsSubRef.current = Pedometer.watchStepCount((r: { steps: number }) => {
+        const delta = Number(r?.steps) || 0
+        setStepsToday(stepsBaseRef.current + delta)
+      }) as unknown as { remove?: () => void }
+
+      setStepsAvailable(true)
+      return { available: true, needsSettings: false }
+    } catch {
+      setStepsAvailable(false)
+      return { available: false, needsSettings }
+    } finally {
+      setStepsPermissionBusy(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void setupStepsTracking(true)
     return () => {
-      cancelled = true
       stepsSubRef.current?.remove?.()
       stepsSubRef.current = null
     }
-  }, [])
+  }, [setupStepsTracking])
 
   const showSnack = (msg: string) => {
     setSnackbarText(msg)
@@ -2217,7 +2260,7 @@ export default function Health() {
     if (!selectedPregnancyTestDate) setSelectedPregnancyTestDate(todayKey)
   }, [selectedPregnancyTestDate, todayKey])
 
-  const persist = async (override?: Partial<StoredData>) => {
+  const persist = useCallback(async (override?: Partial<StoredData>) => {
     const data: StoredData = {
       cycleHistory: history,
       pregnant,
@@ -2240,6 +2283,7 @@ export default function Health() {
       waterTargetMl: Number(waterTargetMl) || 2000,
       waterDailyMl,
       stepsTarget: Math.max(1000, Number(stepsTarget) || 8000),
+      stepsDaily,
       diet: {
         age,
         heightCm,
@@ -2253,7 +2297,38 @@ export default function Health() {
       ...override,
     }
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  }
+  }, [
+    activityLevel,
+    adherenceDaily,
+    age,
+    bloodPressureEntries,
+    dietGoal,
+    heightCm,
+    history,
+    mealChecks,
+    mealSwapIndices,
+    medicineDailyCheckNotificationId,
+    medicineDailyCheckTime,
+    medicineTakenByDate,
+    medicines,
+    panicEmergencyName,
+    panicEmergencyPhone,
+    panicLogs,
+    pregnant,
+    pregnancyAppointmentDate,
+    pregnancyAppointmentTime,
+    pregnancyChecklistByDate,
+    pregnancySymptomsByDate,
+    pregnancyTestDates,
+    pregnancyTestDone,
+    pregnancyTestNotificationIds,
+    pregnancyWeek,
+    stepsDaily,
+    stepsTarget,
+    waterDailyMl,
+    waterTargetMl,
+    weightKg,
+  ])
 
   const load = async () => {
     const saved = await AsyncStorage.getItem(STORAGE_KEY)
@@ -2280,6 +2355,7 @@ export default function Health() {
     setWaterTargetMl(String(data.waterTargetMl ?? 2000))
     setWaterDailyMl(data.waterDailyMl ?? {})
     setStepsTarget(String(data.stepsTarget ?? 8000))
+    setStepsDaily(data.stepsDaily ?? {})
     setAge(data.diet?.age ?? "")
     setHeightCm(data.diet?.heightCm ?? "")
     setWeightKg(data.diet?.weightKg ?? "")
@@ -2313,7 +2389,7 @@ export default function Health() {
       [...medicines].sort((a, b) => toTimeMinutes(a.time) - toTimeMinutes(b.time)),
     [medicines]
   )
-  const todayMedicineTaken = medicineTakenByDate[todayKey] ?? {}
+  const todayMedicineTaken = useMemo(() => medicineTakenByDate[todayKey] ?? {}, [medicineTakenByDate, todayKey])
   const medicineTakenCount = useMemo(
     () => sortedMedicines.reduce((sum, item) => sum + (todayMedicineTaken[item.id] ? 1 : 0), 0),
     [sortedMedicines, todayMedicineTaken]
@@ -2330,11 +2406,32 @@ export default function Health() {
     const firstTomorrow = sortedMedicines[0]
     return `${firstTomorrow.name} • ${firstTomorrow.time} (${HT.medicineTomorrow})`
   }, [sortedMedicines, HT.medicineTomorrow])
-  useEffect(() => {
-    void syncMedicineDayEndReminder()
-  }, [medicinePendingCount, sortedMedicines.length, HT.medicineDayEndReminderTitle, HT.medicineDayEndReminderBody, medicineDailyCheckTime])
   const stepsGoal = Math.max(1000, Number(stepsTarget) || 8000)
   const stepsLeft = Math.max(0, stepsGoal - stepsToday)
+  const stepsProgress = Math.min(1, stepsToday / Math.max(1, stepsGoal))
+  const stepsPercent = Math.max(0, Math.min(100, Math.round(stepsProgress * 100)))
+  const stepsCalories = Math.round(stepsToday * 0.04)
+  const stepsDistanceKm = (stepsToday * 0.00075).toFixed(2)
+  const stepsActiveMinutes = Math.max(0, Math.round(stepsToday / 100))
+  const stepsWalkShift = stepsWalkerProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, compact ? 174 : 228],
+  })
+
+  useEffect(() => {
+    if (!stepsAvailable) return
+    const today = getTodayKey()
+    const current = stepsDaily[today] ?? 0
+    if (stepsToday <= current) return
+    const nextMap = { ...stepsDaily, [today]: stepsToday }
+    setStepsDaily(nextMap)
+
+    // Keep storage writes bounded while retaining useful trend history.
+    if (stepsToday - stepsPersistedRef.current >= 100 || stepsToday >= stepsGoal) {
+      stepsPersistedRef.current = stepsToday
+      void persist({ stepsDaily: nextMap })
+    }
+  }, [stepsAvailable, stepsDaily, stepsToday, stepsGoal, persist])
 
   const addWater = async (ml: number) => {
     const today = getTodayKey()
@@ -2405,14 +2502,16 @@ export default function Health() {
       reminderDate.setHours(20, 0, 0, 0)
 
       if (reminderDate.getTime() > Date.now()) {
-        const notificationId = await Notifications.scheduleNotificationAsync({
-          content: {
+        const notificationId = await scheduleNotificationSafe(
+          {
             title: "WOMIO",
             body: `${testTitle} - ${dateText}`,
           },
-          trigger: reminderDate as unknown as Notifications.NotificationTriggerInput,
-        })
-        nextNotificationIds[testId] = notificationId
+          reminderDate as unknown as Notifications.NotificationTriggerInput
+        )
+        if (notificationId) {
+          nextNotificationIds[testId] = notificationId
+        }
       }
     }
 
@@ -2440,25 +2539,59 @@ export default function Health() {
     await persist({ pregnancyAppointmentDate: dateText, pregnancyAppointmentTime: timeText })
     const hasPermission = await requestNotificationPermission()
     if (hasPermission) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
+      await scheduleNotificationSafe(
+        {
           title: "WOMIO",
           body: `${HT.pregnancyTitle}: ${dateText} ${timeText}`,
         },
-        trigger: scheduleDate as unknown as Notifications.NotificationTriggerInput,
-      })
+        scheduleDate as unknown as Notifications.NotificationTriggerInput
+      )
     }
     showSnack(HT.save)
   }
 
-  const requestNotificationPermission = async () => {
-    const permission = await Notifications.getPermissionsAsync()
-    if (permission.status === "granted") return true
-    const reSult = await Notifications.requestPermissionsAsync()
-    return reSult.status === "granted"
-  }
+  const requestNotificationPermission = useCallback(async () => {
+    try {
+      const permission = await Notifications.getPermissionsAsync()
+      if (permission.status === "granted") return true
+      const reSult = await Notifications.requestPermissionsAsync()
+      return reSult.status === "granted"
+    } catch {
+      return false
+    }
+  }, [])
 
-  async function syncMedicineDayEndReminder() {
+  const ensureAndroidNotificationChannel = useCallback(async () => {
+    if (Platform.OS !== "android") return "default"
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF0066",
+    })
+    return "default"
+  }, [])
+
+  const scheduleNotificationSafe = useCallback(async (
+    content: Notifications.NotificationContentInput,
+    trigger: Notifications.NotificationTriggerInput
+  ) => {
+    try {
+      const channelId = await ensureAndroidNotificationChannel()
+      const safeContent =
+        Platform.OS === "android"
+          ? { ...content, channelId }
+          : content
+      return await Notifications.scheduleNotificationAsync({
+        content: safeContent,
+        trigger,
+      })
+    } catch {
+      return undefined
+    }
+  }, [ensureAndroidNotificationChannel])
+
+  const syncMedicineDayEndReminder = useCallback(async () => {
     if (medicineDailyCheckNotificationId) {
       await Notifications.cancelScheduledNotificationAsync(medicineDailyCheckNotificationId)
       setMedicineDailyCheckNotificationId(undefined)
@@ -2477,16 +2610,31 @@ export default function Health() {
     notifyAt.setHours(parsedTime.hour, parsedTime.minute, 0, 0)
     if (notifyAt.getTime() <= now.getTime()) return
 
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
+    const notificationId = await scheduleNotificationSafe(
+      {
         title: HT.medicineDayEndReminderTitle,
         body: HT.medicineDayEndReminderBody,
       },
-      trigger: notifyAt as unknown as Notifications.NotificationTriggerInput,
-    })
+      notifyAt as unknown as Notifications.NotificationTriggerInput
+    )
+    if (!notificationId) return
     setMedicineDailyCheckNotificationId(notificationId)
     await persist({ medicineDailyCheckNotificationId: notificationId })
-  }
+  }, [
+    HT.medicineDayEndReminderBody,
+    HT.medicineDayEndReminderTitle,
+    medicineDailyCheckNotificationId,
+    medicineDailyCheckTime,
+    medicinePendingCount,
+    persist,
+    requestNotificationPermission,
+    scheduleNotificationSafe,
+    sortedMedicines.length,
+  ])
+
+  useEffect(() => {
+    void syncMedicineDayEndReminder()
+  }, [syncMedicineDayEndReminder])
 
   const setQuickMedicineTime = (time: string) => {
     setMedicineTime(time)
@@ -2502,9 +2650,11 @@ export default function Health() {
   }
 
   const addMedicineReminder = async () => {
-    if (!medicineName.trim()) return
+    const name = medicineName.trim()
+    const time = medicineTime.trim()
+    if (!name) return
 
-    const parsed = parseTime(medicineTime)
+    const parsed = parseTime(time)
     if (!parsed) {
       showSnack(HT.medicineInvalid)
       return
@@ -2514,23 +2664,23 @@ export default function Health() {
     let notificationId: string | undefined
 
     if (hasPermission) {
-      notificationId = await Notifications.scheduleNotificationAsync({
-        content: {
+      notificationId = await scheduleNotificationSafe(
+        {
           title: "WOMIO",
-          body: `${medicineName.trim()} reminder`,
+          body: `${name} reminder`,
         },
-        trigger: {
+        {
           hour: parsed.hour,
           minute: parsed.minute,
           repeats: true,
-        } as Notifications.NotificationTriggerInput,
-      })
+        } as Notifications.NotificationTriggerInput
+      )
     }
 
     const item: MedicineItem = {
       id: `${Date.now()}`,
-      name: medicineName.trim(),
-      time: medicineTime,
+      name,
+      time,
       notificationId,
     }
 
@@ -2573,6 +2723,52 @@ export default function Health() {
     setStepsTarget(normalized)
     await persist({ stepsTarget: Number(normalized) })
     showSnack(HT.stepsSaved)
+  }
+
+  const handleEnableSteps = async () => {
+    const result = await setupStepsTracking(true)
+    if (result.available) return
+    if (result.needsSettings) {
+      Alert.alert(
+        "İzin Gerekli",
+        "Adım sayar izni kapalı. Ayarlardan izin verip tekrar dene.",
+        [
+          { text: "Vazgeç", style: "cancel" },
+          {
+            text: "Ayarları Aç",
+            onPress: () => {
+              void Linking.openSettings()
+            },
+          },
+        ]
+      )
+      return
+    }
+    Alert.alert("İzin Gerekli", "Adım sayar için aktivite iznini verip tekrar dene.")
+  }
+
+  const handleCheckDevicePermissions = async () => {
+    const snap = await ensureCorePermissions(true)
+    const denied: string[] = []
+    if (snap.activityRecognition !== "granted") denied.push("Hareket / Adım")
+    if (snap.notifications !== "granted") denied.push("Bildirim")
+    if (snap.mediaLibrary !== "granted") denied.push("Galeri")
+    if (snap.camera !== "granted") denied.push("Kamera")
+
+    if (denied.length === 0) {
+      showSnack("Tüm izinler hazır.")
+      void setupStepsTracking(true)
+      return
+    }
+
+    Alert.alert(
+      "Eksik İzinler",
+      `Şu izinler eksik: ${denied.join(", ")}.\nAyarlar ekranından tamamlayabilirsin.`,
+      [
+        { text: "Tamam", style: "cancel" },
+        { text: "Ayarları Aç", onPress: () => void Linking.openSettings() },
+      ]
+    )
   }
 
   const classifyBloodPressure = (s: number, d: number) => {
@@ -2685,11 +2881,13 @@ export default function Health() {
 
   const savePanicEmergencyContact = async () => {
     const name = panicEmergencyName.trim()
-    const phone = normalizePhoneForTel(panicEmergencyPhone.trim())
+    const phone = normalizePhoneForStorage(panicEmergencyPhone.trim())
     if (!name || !phone) {
       showSnack(HT.panicEmergencyMissing)
       return
     }
+    setPanicEmergencyName(name)
+    setPanicEmergencyPhone(phone)
     await persist({ panicEmergencyName: name, panicEmergencyPhone: phone })
     showSnack(HT.panicEmergencySaved)
   }
@@ -2822,7 +3020,23 @@ export default function Health() {
   const weekKeys = useMemo(() => getLastDateKeys(7), [])
   const weekLabels = useMemo(() => weekKeys.map((key) => getShortDayLabel(key, L)), [weekKeys, L])
   const waterWeek = useMemo(() => weekKeys.map((k) => waterDailyMl[k] ?? 0), [weekKeys, waterDailyMl])
+  const prevWeekKeys = useMemo(() => weekKeys.map((k) => addDays(k, -7)), [weekKeys])
+  const stepsWeek = useMemo(
+    () => weekKeys.map((k) => (k === todayKey ? Math.max(stepsDaily[k] ?? 0, stepsToday) : stepsDaily[k] ?? 0)),
+    [weekKeys, stepsDaily, stepsToday, todayKey]
+  )
+  const prevStepsWeek = useMemo(() => prevWeekKeys.map((k) => stepsDaily[k] ?? 0), [prevWeekKeys, stepsDaily])
   const dietWeek = useMemo(() => weekKeys.map((k) => adherenceDaily[k] ?? 0), [weekKeys, adherenceDaily])
+  const stepsTrendTitle = L === "en" ? "7-day trend" : L === "de" ? "7-Tage-Trend" : L === "ru" ? "Trend za 7 dney" : "7 gunluk trend"
+  const stepsAvgLabel = L === "en" ? "Weekly average" : L === "de" ? "Wochenmittel" : L === "ru" ? "Srednee za nedelyu" : "Haftalik ortalama"
+  const stepsDeltaLabel = L === "en" ? "vs previous week" : L === "de" ? "vs letzte Woche" : L === "ru" ? "k proshloy nedele" : "Gecen haftaya gore"
+  const stepsWeekAvg = Math.round(stepsWeek.reduce((sum, val) => sum + val, 0) / Math.max(1, stepsWeek.length))
+  const prevStepsWeekAvg = Math.round(prevStepsWeek.reduce((sum, val) => sum + val, 0) / Math.max(1, prevStepsWeek.length))
+  const stepsDeltaPercent =
+    prevStepsWeekAvg > 0 ? Math.round(((stepsWeekAvg - prevStepsWeekAvg) / prevStepsWeekAvg) * 100) : 0
+  const stepsDeltaText = `${stepsDeltaPercent >= 0 ? "+" : ""}${stepsDeltaPercent}%`
+  const stepsDeltaTone: "up" | "down" | "flat" =
+    stepsDeltaPercent > 0 ? "up" : stepsDeltaPercent < 0 ? "down" : "flat"
   const cycleDaysDelta = useMemo(() => getCycleDaysDelta(history, selectedDate), [history, selectedDate])
   const cycleLastPeriodDate = useMemo(
     () => (history.length > 0 ? formatDateByLanguage(history[0], L) : "-"),
@@ -3764,46 +3978,151 @@ export default function Health() {
         <Text style={[styles.cardTitle, compact && styles.cardTitleCompact]}>
           {HT.stepsTitle}
         </Text>
-        {stepsAvailable ? (
-          <>
+        <>
+          <Text style={[styles.text, compact && styles.textCompact]}>
+            {HT.stepsTodayLine
+              .replace("{steps}", String(stepsToday))
+              .replace("{goal}", String(stepsGoal))
+              .replace("{left}", String(stepsLeft))}
+          </Text>
+          <Text style={[styles.smallText, compact && styles.smallTextCompact]}>
+            {stepsAvailable ? HT.stepsLiveOn : HT.stepsLiveOff}
+          </Text>
+          {!stepsAvailable ? (
             <Text style={[styles.text, compact && styles.textCompact]}>
-              {HT.stepsTodayLine
-                .replace("{steps}", String(stepsToday))
-                .replace("{goal}", String(stepsGoal))
-                .replace("{left}", String(stepsLeft))}
+              {HT.stepSunavailable}
             </Text>
-            <Text style={[styles.smallText, compact && styles.smallTextCompact]}>
-              {stepsAvailable ? HT.stepsLiveOn : HT.stepsLiveOff}
-            </Text>
-            <View style={styles.cycleSummaryRow}>
-              <View style={[styles.cycleSummaryCard, compact && styles.cycleSummaryCardCompact]}>
-                <View style={styles.cycleSummaryHead}>
-                  <Ionicons name="walk-outline" size={14} color={tc("#D14A82")} />
-                  <Text style={[styles.smallText, compact && styles.smallTextCompact]}>{HT.todayLabel}</Text>
+          ) : null}
+          {!stepsAvailable ? (
+            <Pressable
+              style={[styles.buttonSoft, styles.stepsPermissionBtn, stepsPermissionBusy && styles.buttonSoftDisabled]}
+              onPress={() => void handleEnableSteps()}
+              disabled={stepsPermissionBusy}
+            >
+              <Text style={[styles.buttonText, compact && styles.buttonTextCompact]}>
+                {stepsPermissionBusy ? HT.stepsPermissionChecking : HT.stepsGrantPermission}
+              </Text>
+            </Pressable>
+          ) : null}
+          {!stepsAvailable ? (
+            <Pressable style={[styles.buttonSoft, styles.stepsPermissionBtn]} onPress={() => void handleCheckDevicePermissions()}>
+              <Text style={[styles.buttonText, compact && styles.buttonTextCompact]}>
+                {HT.stepsCheckAllPermissions}
+              </Text>
+            </Pressable>
+          ) : null}
+          <View style={styles.stepsHighlightCard}>
+            <View style={styles.stepsHighlightOrbOne} />
+            <View style={styles.stepsHighlightOrbTwo} />
+            <View style={styles.stepsHighlightRow}>
+              <View style={styles.stepsRingOuter}>
+                <View style={styles.stepsRingInner}>
+                  <Text style={styles.stepsRingPercent}>{stepsPercent}%</Text>
+                  <Text style={styles.stepsRingLabel}>tamam</Text>
                 </View>
-                <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsToday}</Text>
               </View>
-              <View style={[styles.cycleSummaryCard, compact && styles.cycleSummaryCardCompact]}>
-                <View style={styles.cycleSummaryHead}>
-                  <Ionicons name="flag-outline" size={14} color={tc("#D14A82")} />
-                  <Text style={[styles.smallText, compact && styles.smallTextCompact]}>{HT.goal}</Text>
-                </View>
-                <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsGoal}</Text>
-              </View>
-              <View style={[styles.cycleSummaryCard, styles.cycleSummaryCardAccent, compact && styles.cycleSummaryCardCompact]}>
-                <View style={styles.cycleSummaryHead}>
-                  <Ionicons name="trending-up-outline" size={14} color={moduleTheme.colors.brand} />
-                  <Text style={[styles.smallText, compact && styles.smallTextCompact]}>{HT.remainingLabel}</Text>
-                </View>
-                <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsLeft}</Text>
+              <View style={styles.stepsHighlightTextWrap}>
+                <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>
+                  Hedefe ilerliyorsun
+                </Text>
+                <Text style={[styles.smallText, compact && styles.smallTextCompact, styles.stepsHighlightSub]}>
+                  {stepsLeft > 0 ? `${stepsLeft} adim daha` : "Bugunku hedef tamamlandi"}
+                </Text>
               </View>
             </View>
-          </>
-        ) : (
-          <Text style={[styles.text, compact && styles.textCompact]}>
-            {HT.stepSunavailable}
-          </Text>
-        )}
+          </View>
+          <View style={styles.miniProgressTrack}>
+            <View style={[styles.miniProgressFill, { width: `${Math.max(3, Math.round(stepsProgress * 100))}%` }]} />
+          </View>
+          <View style={styles.stepsWalkTrack}>
+            <View style={styles.stepsWalkGuide} />
+            <Animated.View style={[styles.stepsWalker, { transform: [{ translateX: stepsWalkShift }] }]}>
+              <Ionicons name="walk" size={18} color={tc("#B4004A")} />
+            </Animated.View>
+          </View>
+          <View style={styles.cycleSummaryRow}>
+            <View style={[styles.cycleSummaryCard, compact && styles.cycleSummaryCardCompact]}>
+              <View style={styles.cycleSummaryHead}>
+                <Ionicons name="walk-outline" size={14} color={tc("#D14A82")} />
+                <Text style={[styles.smallText, compact && styles.smallTextCompact]}>{HT.todayLabel}</Text>
+              </View>
+              <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsToday}</Text>
+            </View>
+            <View style={[styles.cycleSummaryCard, compact && styles.cycleSummaryCardCompact]}>
+              <View style={styles.cycleSummaryHead}>
+                <Ionicons name="flag-outline" size={14} color={tc("#D14A82")} />
+                <Text style={[styles.smallText, compact && styles.smallTextCompact]}>{HT.goal}</Text>
+              </View>
+              <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsGoal}</Text>
+            </View>
+            <View style={[styles.cycleSummaryCard, styles.cycleSummaryCardAccent, compact && styles.cycleSummaryCardCompact]}>
+              <View style={styles.cycleSummaryHead}>
+                <Ionicons name="trending-up-outline" size={14} color={moduleTheme.colors.brand} />
+                <Text style={[styles.smallText, compact && styles.smallTextCompact]}>{HT.remainingLabel}</Text>
+              </View>
+              <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsLeft}</Text>
+            </View>
+          </View>
+          <View style={styles.stepsExtrasRow}>
+            <View style={[styles.stepsExtraCard, compact && styles.stepsExtraCardCompact]}>
+              <View style={styles.cycleSummaryHead}>
+                <Ionicons name="flame-outline" size={14} color={tc("#D14A82")} />
+                <Text style={[styles.smallText, compact && styles.smallTextCompact]}>Kalori</Text>
+              </View>
+              <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsCalories} kcal</Text>
+            </View>
+            <View style={[styles.stepsExtraCard, compact && styles.stepsExtraCardCompact]}>
+              <View style={styles.cycleSummaryHead}>
+                <Ionicons name="map-outline" size={14} color={tc("#D14A82")} />
+                <Text style={[styles.smallText, compact && styles.smallTextCompact]}>Mesafe</Text>
+              </View>
+              <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsDistanceKm} km</Text>
+            </View>
+            <View style={[styles.stepsExtraCard, compact && styles.stepsExtraCardCompact]}>
+              <View style={styles.cycleSummaryHead}>
+                <Ionicons name="time-outline" size={14} color={tc("#D14A82")} />
+                <Text style={[styles.smallText, compact && styles.smallTextCompact]}>Aktif sure</Text>
+              </View>
+              <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsActiveMinutes} dk</Text>
+            </View>
+          </View>
+          <WeeklyBars
+            title={stepsTrendTitle}
+            values={stepsWeek}
+            labels={weekLabels}
+            maxValue={Math.max(1, ...stepsWeek, stepsGoal)}
+            unit={HT.stepsShort}
+            color={tc("#D14A82")}
+          />
+          <View style={styles.stepsTrendSummaryRow}>
+            <View style={[styles.stepsTrendCard, compact && styles.stepsTrendCardCompact]}>
+              <Text style={[styles.smallText, compact && styles.smallTextCompact]}>{stepsAvgLabel}</Text>
+              <Text style={[styles.textStrong, compact && styles.textStrongCompact]}>{stepsWeekAvg}</Text>
+            </View>
+            <View style={[styles.stepsTrendCard, styles.stepsTrendCardAccent, compact && styles.stepsTrendCardCompact]}>
+              <Text style={[styles.smallText, compact && styles.smallTextCompact]}>{stepsDeltaLabel}</Text>
+              <View style={[styles.stepsDeltaBadge, stepsDeltaTone === "up" ? styles.stepsDeltaBadgeUp : stepsDeltaTone === "down" ? styles.stepsDeltaBadgeDown : styles.stepsDeltaBadgeFlat]}>
+                <Ionicons
+                  name={stepsDeltaTone === "up" ? "arrow-up" : stepsDeltaTone === "down" ? "arrow-down" : "remove"}
+                  size={12}
+                  color={stepsDeltaTone === "up" ? tc("#0F7A41") : stepsDeltaTone === "down" ? tc("#A22D2D") : tc("#5E5E5E")}
+                />
+                <Text
+                  style={[
+                    styles.stepsDeltaBadgeText,
+                    stepsDeltaTone === "up"
+                      ? styles.stepsDeltaBadgeTextUp
+                      : stepsDeltaTone === "down"
+                        ? styles.stepsDeltaBadgeTextDown
+                        : styles.stepsDeltaBadgeTextFlat,
+                  ]}
+                >
+                  {stepsDeltaText}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </>
         <View style={styles.fieldCard}>
           <Ionicons name="walk-outline" size={18} color={moduleTheme.colors.textStrong} />
           <TextInput
@@ -4435,6 +4754,13 @@ const toTimeMinutes = (timeText: string) => {
   return parsed.hour * 60 + parsed.minute
 }
 const normalizePhoneForTel = (value: string) => value.replace(/[^\d+]/g, "")
+const normalizePhoneForStorage = (value: string) => {
+  const cleaned = value.replace(/[^\d+]/g, "")
+  if (cleaned.startsWith("+")) {
+    return `+${cleaned.slice(1).replace(/\+/g, "")}`
+  }
+  return cleaned.replace(/\+/g, "")
+}
 
 const getCycleDaysDelta = (history: string[], selectedDate: string | null) => {
   if (history.length === 0) return 0
@@ -5137,8 +5463,10 @@ const styles = StyleSheet.create({
   },
   button: { backgroundColor: moduleTheme.colors.brand, borderRadius: 10, padding: 13, alignItems: "center", marginBottom: 10, minHeight: 48, justifyContent: "center" },
   buttonSoft: { backgroundColor: tc("#F4E7DD"), borderRadius: 10, padding: 13, alignItems: "center", marginBottom: 10, minHeight: 48, justifyContent: "center" },
+  buttonSoftDisabled: { opacity: 0.6 },
   buttonText: { color: tc("#3D2A4F"), fontWeight: "600", fontSize: 16, lineHeight: 22 },
   buttonTextCompact: { fontSize: 15, lineHeight: 20 },
+  stepsPermissionBtn: { marginTop: 2, marginBottom: 8 },
   chip: { paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999, backgroundColor: tc("#F8F3FB"), borderWidth: 1, borderColor: tc("#DDCBE9"), minHeight: 42, justifyContent: "center" },
   chipCompact: { paddingVertical: 8, paddingHorizontal: 12, minHeight: 38 },
   chipText: { color: tc("#3D2A4F"), fontSize: 15, lineHeight: 20, fontWeight: "600" },
@@ -5397,6 +5725,186 @@ const styles = StyleSheet.create({
   },
   cycleSummaryCardCompact: {
     width: "100%",
+  },
+  stepsWalkTrack: {
+    marginTop: 8,
+    marginBottom: 8,
+    height: 34,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: tc("#E8D2C2"),
+    backgroundColor: "rgba(255,255,255,0.82)",
+    overflow: "hidden",
+    justifyContent: "center",
+    paddingHorizontal: 8,
+  },
+  stepsHighlightCard: {
+    marginTop: 8,
+    marginBottom: 8,
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: tc("#E7B8D0"),
+    backgroundColor: tc("#FFEAF4"),
+    overflow: "hidden",
+  },
+  stepsHighlightOrbOne: {
+    position: "absolute",
+    width: 90,
+    height: 90,
+    borderRadius: 999,
+    right: -20,
+    top: -18,
+    backgroundColor: "rgba(180,0,74,0.14)",
+  },
+  stepsHighlightOrbTwo: {
+    position: "absolute",
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    left: -16,
+    bottom: -26,
+    backgroundColor: "rgba(255,184,213,0.35)",
+  },
+  stepsHighlightRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  stepsHighlightTextWrap: {
+    flex: 1,
+  },
+  stepsHighlightSub: {
+    color: tc("#7A5266"),
+    marginTop: 2,
+  },
+  stepsRingOuter: {
+    width: 66,
+    height: 66,
+    borderRadius: 999,
+    borderWidth: 4,
+    borderColor: tc("#D14A82"),
+    backgroundColor: "rgba(255,255,255,0.75)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepsRingInner: {
+    width: 50,
+    height: 50,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: tc("#F3BDD8"),
+    backgroundColor: "rgba(255,255,255,0.92)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepsRingPercent: {
+    color: tc("#B4004A"),
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: "700",
+  },
+  stepsRingLabel: {
+    color: tc("#7A5266"),
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  stepsWalkGuide: {
+    position: "absolute",
+    left: 10,
+    right: 10,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: "rgba(209,74,130,0.2)",
+  },
+  stepsWalker: {
+    width: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepsExtrasRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 8,
+    marginBottom: 2,
+  },
+  stepsExtraCard: {
+    width: "31.5%",
+    minHeight: 68,
+    backgroundColor: "rgba(255,239,247,0.92)",
+    borderWidth: 1,
+    borderColor: tc("#E6BCD0"),
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+  },
+  stepsExtraCardCompact: {
+    width: "100%",
+  },
+  stepsTrendSummaryRow: {
+    marginTop: 2,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  stepsTrendCard: {
+    width: "48.5%",
+    minHeight: 62,
+    backgroundColor: "rgba(255,255,255,0.88)",
+    borderWidth: 1,
+    borderColor: tc("#E6BCD0"),
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+  },
+  stepsTrendCardAccent: {
+    backgroundColor: tc("#FFEADF"),
+    borderColor: tc("#E7B68E"),
+  },
+  stepsTrendCardCompact: {
+    width: "100%",
+  },
+  stepsDeltaBadge: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  stepsDeltaBadgeUp: {
+    backgroundColor: tc("#EAF8F0"),
+    borderColor: tc("#95D9B2"),
+  },
+  stepsDeltaBadgeDown: {
+    backgroundColor: tc("#FDEEEE"),
+    borderColor: tc("#EAB1B1"),
+  },
+  stepsDeltaBadgeFlat: {
+    backgroundColor: tc("#F2F2F2"),
+    borderColor: tc("#D4D4D4"),
+  },
+  stepsDeltaBadgeText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+  },
+  stepsDeltaBadgeTextUp: {
+    color: tc("#0F7A41"),
+  },
+  stepsDeltaBadgeTextDown: {
+    color: tc("#A22D2D"),
+  },
+  stepsDeltaBadgeTextFlat: {
+    color: tc("#5E5E5E"),
   },
   cycleSummaryHead: {
     flexDirection: "row",

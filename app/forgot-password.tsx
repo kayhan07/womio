@@ -1,4 +1,4 @@
-﻿import { router } from "expo-router"
+import { router } from "expo-router"
 import { useState } from "react"
 import { ImageBackground, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native"
 
@@ -18,9 +18,9 @@ export default function ForgotPassword() {
           </View>
           <View pointerEvents="none" style={styles.bgOverlay} />
 
-          <Text style={[styles.title, compact && styles.titleCompact]}>Åifremi UnutTüm</Text>
+          <Text style={[styles.title, compact && styles.titleCompact]}>Şifremi Unuttum</Text>
           <Text style={[styles.info, compact && styles.infoCompact]}>
-            GeÃ§ici ÅŸifre gÃ¶nderimi iÃ§in kayÄ±tlÄ± e-posta adresini gir.
+            Geçici şifre gönderimi için kayıtlı e-posta adresini gir.
           </Text>
 
           <View style={styles.fieldCard}>
@@ -35,7 +35,7 @@ export default function ForgotPassword() {
           </View>
 
           <Pressable style={styles.primaryButton} onPress={() => router.push("/login")}>
-            <Text style={styles.primaryText}>GeÃ§ici Åifre GÃ¶nder</Text>
+            <Text style={styles.primaryText}>Geçici Şifre Gönder</Text>
           </Pressable>
         </View>
       </View>

@@ -56,6 +56,22 @@ const dbQuery = async (text, params = []) => {
 
 const normalizeEmail = (email) => `${email ?? ""}`.trim().toLowerCase()
 
+const normalizeBirthDate = (value) => {
+  const raw = `${value ?? ""}`.trim()
+  if (!raw) return ""
+
+  const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (isoMatch) return raw
+
+  const trMatch = raw.match(/^(\d{2})[./-](\d{2})[./-](\d{4})$/)
+  if (trMatch) {
+    const [, day, month, year] = trMatch
+    return `${year}-${month}-${day}`
+  }
+
+  return raw
+}
+
 const buildAuthUser = (row, roleIds = []) => ({
   id: row.id,
   username: row.username,
@@ -106,7 +122,7 @@ app.post("/auth/register", async (req, res) => {
     const username = `${req.body?.username ?? ""}`.trim()
     const email = normalizeEmail(req.body?.email)
     const password = `${req.body?.password ?? ""}`
-    const birthDate = `${req.body?.birthDate ?? ""}`.trim()
+    const birthDate = normalizeBirthDate(req.body?.birthDate)
 
     if (!username || !email || !password) {
       return res.status(400).json({ error: "username, email and password are required" })
@@ -144,8 +160,9 @@ app.post("/auth/register", async (req, res) => {
 
     return res.status(201).json({ token, user })
   } catch (error) {
-    console.error("Auth register error:", error?.message ?? error)
-    return res.status(500).json({ error: "register failed" })
+    const detail = error?.code && error?.message ? `${error.code}: ${error.message}` : `${error?.message ?? error ?? "unknown"}`
+    console.error("Auth register error:", detail)
+    return res.status(500).json({ error: "register failed", detail })
   }
 })
 

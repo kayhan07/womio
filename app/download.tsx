@@ -12,40 +12,26 @@ type LinkItem = {
 
 const FALLBACKS = {
   website: "https://womio.net",
-  play: "https://play.google.com/store/apps/details?id=net.womio.app",
-  appStore: "https://apps.apple.com/app/id0000000000",
+  android: "https://womio.net/downloads/womio-latest.apk",
+  ios: "https://womio.net/downloads/womio-ios.ipa",
 }
 
 export default function DownloadScreen() {
   const links = useMemo<LinkItem[]>(
     () => [
       {
-        id: "play",
-        title: "Google Play",
-        subtitle: "Android icin resmi yukleme",
-        url: process.env.EXPO_PUBLIC_GOOGLE_PLAY_URL || FALLBACKS.play,
-        icon: "logo-google-playstore",
+        id: "android",
+        title: "Android",
+        subtitle: "APK dosyasini indir",
+        url: process.env.EXPO_PUBLIC_ANDROID_APK_URL || FALLBACKS.android,
+        icon: "logo-android",
       },
       {
-        id: "appstore",
-        title: "App Store",
-        subtitle: "iPhone icin resmi yukleme",
-        url: process.env.EXPO_PUBLIC_APP_STORE_URL || FALLBACKS.appStore,
-        icon: "logo-apple-appstore",
-      },
-      {
-        id: "apk",
-        title: "Android APK",
-        subtitle: "Store disi test dagitimi",
-        url: process.env.EXPO_PUBLIC_ANDROID_APK_URL,
-        icon: "download-outline",
-      },
-      {
-        id: "testflight",
-        title: "TestFlight",
-        subtitle: "iOS test dagitimi",
-        url: process.env.EXPO_PUBLIC_TESTFLIGHT_URL,
-        icon: "flask-outline",
+        id: "iphone",
+        title: "iPhone",
+        subtitle: "iOS yukleme dosyasi",
+        url: process.env.EXPO_PUBLIC_IOS_APP_URL || FALLBACKS.ios,
+        icon: "logo-apple",
       },
     ],
     []
@@ -62,7 +48,7 @@ export default function DownloadScreen() {
     <View style={s.page}>
       <Text style={s.badge}>WOMIO</Text>
       <Text style={s.title}>Mobil Uygulamayi Indir</Text>
-      <Text style={s.subtitle}>Google Play, App Store veya test kanallari ile kurulum yap.</Text>
+      <Text style={s.subtitle}>Android ve iPhone yukleme dosyalarina buradan ulas.</Text>
 
       {links.map((item) => {
         const disabled = !item.url

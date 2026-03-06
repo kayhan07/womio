@@ -1,4 +1,4 @@
-﻿import { router } from "expo-router"
+import { router } from "expo-router"
 import { ImageBackground, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native"
 
 const ONBOARD_IMAGE_URI = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80"
