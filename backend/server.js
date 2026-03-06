@@ -83,6 +83,15 @@ const buildAuthUser = (row, roleIds = []) => ({
   isAdmin: roleIds.includes("admin") || roleIds.includes("super_admin"),
 })
 
+const extractRoleIds = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((x) => `${x}`.trim().toLowerCase()).filter(Boolean)
+  }
+  return `${value ?? ""}`.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean)
+}
+
+const isAdminRole = (roleIds = []) => roleIds.includes("admin") || roleIds.includes("super_admin")
+
 const createAccessToken = (user) => {
   if (!jwtSecret) throw new Error("JWT_SECRET is missing")
   return jwt.sign(
@@ -241,6 +250,62 @@ app.get("/auth/me", requireAuth, async (req, res) => {
   } catch (error) {
     console.error("Auth me error:", error?.message ?? error)
     return res.status(500).json({ error: "me failed" })
+  }
+})
+
+app.get("/admin/members", requireAuth, async (req, res) => {
+  if (!isAuthEnabled()) {
+    return res.status(503).json({ error: "auth service is not configured" })
+  }
+
+  const requesterRoleIds = extractRoleIds(req.auth?.roleIds)
+  if (!isAdminRole(requesterRoleIds)) {
+    return res.status(403).json({ error: "admin access required" })
+  }
+
+  try {
+    const rows = await dbQuery(
+      `select u.id, u.email, u.username, u.birth_date, u.created_at, u.status, u.blocked_until,
+              group_concat(distinct r.code separator ',') as role_ids_csv
+       from app_users u
+       left join user_roles ur on ur.user_id = u.id
+       left join roles r on r.id = ur.role_id
+       group by u.id, u.email, u.username, u.birth_date, u.created_at, u.status, u.blocked_until
+       order by u.created_at desc`
+    )
+
+    const users = rows.map((row) => {
+      const roleIds = extractRoleIds(row.role_ids_csv)
+      const blockedUntil =
+        row.blocked_until && !Number.isNaN(new Date(row.blocked_until).getTime())
+          ? new Date(row.blocked_until).toISOString()
+          : undefined
+      const blocked =
+        `${row.status ?? ""}`.toLowerCase() === "blocked" ||
+        Boolean(blockedUntil && new Date(blockedUntil).getTime() > Date.now())
+
+      return {
+        id: `${row.id}`,
+        username: `${row.username ?? ""}`.trim(),
+        email: `${row.email ?? ""}`.trim().toLowerCase(),
+        fullName: undefined,
+        country: undefined,
+        city: undefined,
+        birthDate: row.birth_date ? new Date(row.birth_date).toISOString().slice(0, 10) : undefined,
+        phone: undefined,
+        roleIds: roleIds.length ? roleIds : ["member"],
+        createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+        blocked,
+        blockedReason: blocked ? "account blocked" : undefined,
+        blockedAt: blockedUntil,
+        blockedUntil,
+      }
+    })
+
+    return res.json({ users })
+  } catch (error) {
+    console.error("Admin members error:", error?.message ?? error)
+    return res.status(500).json({ error: "admin members failed" })
   }
 })
 
