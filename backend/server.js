@@ -1311,6 +1311,14 @@ app.get("/health", (_req, res) => {
     ok: true,
     service: "womio-backend",
     timestamp: new Date().toISOString(),
+    auth: {
+      dbHostConfigured: Boolean(dbHost),
+      dbUserConfigured: Boolean(dbUser),
+      dbNameConfigured: Boolean(dbName),
+      poolConfigured: Boolean(pool),
+      jwtConfigured: Boolean(jwtSecret),
+      enabled: isAuthEnabled(),
+    },
   })
 })
 
