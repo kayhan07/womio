@@ -360,12 +360,12 @@ export default function ServicesScreen() {
   const l = I18N[language]
   const photoLabText =
     language === "tr"
-      ? { title: "Fotoğraf Shoplama", desc: "Yüz fotoğrafını düzenle, indir ve sosyal medyada paylaş." }
+      ? { title: "Güzellik Stüdyosu", desc: "Selfie düzenle, görünüm dene, indir ve paylaş." }
       : language === "de"
-        ? { title: "Foto Studio", desc: "Bearbeite dein Gesichtsfoto und teile es direkt." }
+        ? { title: "Beauty Studio", desc: "Optimiere dein Selfie und teile es direkt." }
         : language === "ru"
-          ? { title: "Фото студия", desc: "Редактируй фото лица и сразу делись." }
-          : { title: "Photo Studio", desc: "Edit your face photo, download and share it." }
+          ? { title: "Бьюти-студия", desc: "Редактируй селфи, сохраняй и делись." }
+          : { title: "Beauty Studio", desc: "Refine selfies, save the result and share it." }
   const [mode, setMode] = useState<Mode>("discover")
   const [posts, setPosts] = useState<ServicePost[]>([])
   const [quota, setQuota] = useState<ServicesQuota>({ freeUsed: 0, paidCredits: 0, purchases: [] })
@@ -1013,7 +1013,6 @@ const styles = StyleSheet.create({
   qaQ: { color: tc("#4A342A"), fontSize: 12, fontWeight: "600" },
   qaA: { color: tc("#FFD6E8"), fontSize: 12, marginTop: 4, lineHeight: 18 },
 })
-
 
 
 

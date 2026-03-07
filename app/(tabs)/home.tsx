@@ -218,10 +218,10 @@ export default function Home() {
               </View>
               <View style={styles.cardCopy}>
                 <Text style={[styles.cardTitle, compact && styles.cardTitleCompact]}>
-                  {isTr ? "Fotoğraf Shoplama" : "Photo Studio"}
+                  {isTr ? "Güzellik Stüdyosu" : "Beauty Studio"}
                 </Text>
                 <Text style={[styles.cardSubtitle, compact && styles.cardSubtitleCompact]}>
-                  {isTr ? "Yüz fotoğrafını AI ile düzenle, kaydet ve paylaş." : "Edit face photos with AI, save and share."}
+                  {isTr ? "Selfie düzenle, görünüm dene, kaydet ve paylaş." : "Refine selfies, try a look, save and share."}
                 </Text>
                 <Text style={styles.cardCta}>{isTr ? "Hemen Aç" : "Open Now"}</Text>
               </View>

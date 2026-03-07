@@ -17,6 +17,7 @@ type Tone = {
   title: string
   subtitle: string
   load: string
+  looks: string
   camera: string
   gallery: string
   before: string
@@ -36,11 +37,12 @@ type Tone = {
 
 const TEXT: Record<string, Tone> = {
   tr: {
-    title: "Fotoğraf Shoplama",
-    subtitle: "Yüz fotoğrafı yükle, makyaj ve genç görünüm efekti uygula.",
-    load: "Fotoğraf Yükle",
+    title: "Güzellik Stüdyosu",
+    subtitle: "Selfie veya yüz fotoğrafını düzenle, görünümü güçlendir, kaydet ve paylaş.",
+    load: "Fotoğrafını Hazırla",
+    looks: "Hazır Görünümler",
     camera: "Kamera",
-    gallery: "Galeri",
+    gallery: "Galeriden Seç",
     before: "Önce",
     after: "Sonra",
     save: "İndir / Kaydet",
@@ -49,16 +51,17 @@ const TEXT: Record<string, Tone> = {
     permission: "Kamera/galeri izni gerekli.",
     saveDone: "Düzenlenen fotoğraf galeriye kaydedildi.",
     saveFail: "Kaydetme sırasında hata oluştu.",
-    apply: "AI ile Düzenle",
-    applying: "AI düzenliyor...",
-    aiReady: "AI sonucu hazır. Sonra sekmesinden görebilirsin.",
-    aiFallback: "AI servisi bağlı değil, geçici yerel efekt gösteriliyor.",
-    tips: "İpucu: Önden çekilmiş, net yüz fotoğrafı en iyi sonucu verir.",
+    apply: "Görünümü Uygula",
+    applying: "Görünüm hazırlanıyor...",
+    aiReady: "Düzenleme hazır. Sonra görünümünde kontrol edebilirsin.",
+    aiFallback: "Canlı servis erişilemedi, stüdyo önizlemesi kullanılıyor.",
+    tips: "İpucu: Önden çekilmiş, net ve aydınlık bir portre en iyi sonucu verir.",
   },
   en: {
-    title: "Photo Studio",
-    subtitle: "Upload a face photo, apply makeup and younger look effects.",
-    load: "Upload Photo",
+    title: "Beauty Studio",
+    subtitle: "Refine a selfie, try a polished look, then save and share it.",
+    load: "Prepare Photo",
+    looks: "Quick Looks",
     camera: "Camera",
     gallery: "Gallery",
     before: "Before",
@@ -69,11 +72,11 @@ const TEXT: Record<string, Tone> = {
     permission: "Camera/gallery permission is required.",
     saveDone: "Edited photo saved to gallery.",
     saveFail: "An error occurred while saving.",
-    apply: "Enhance with AI",
-    applying: "AI is editing...",
-    aiReady: "AI result is ready. Check the After tab.",
-    aiFallback: "AI service is unavailable, using local preview effect.",
-    tips: "Tip: A front-facing and clear face photo gives the best result.",
+    apply: "Apply Look",
+    applying: "Preparing look...",
+    aiReady: "Your look is ready. Check the After view.",
+    aiFallback: "Live service is unavailable, using studio preview.",
+    tips: "Tip: A front-facing, bright and clear portrait gives the best result.",
   },
 }
 
@@ -99,6 +102,23 @@ const toBase64FromUri = async (uri: string) => {
 export default function PhotoLabScreen() {
   const { language } = useAppLanguage()
   const t = useMemo(() => TEXT[language] || TEXT.en, [language])
+  const presets = useMemo(
+    () =>
+      language === "tr"
+        ? [
+            { name: "Doğal Işıltı", makeup: 30, young: 20, smooth: 35 },
+            { name: "Soft Glam", makeup: 55, young: 28, smooth: 48 },
+            { name: "Canlı Selfie", makeup: 40, young: 38, smooth: 56 },
+            { name: "Gece Işıltısı", makeup: 64, young: 24, smooth: 44 },
+          ]
+        : [
+            { name: "Natural Glow", makeup: 30, young: 20, smooth: 35 },
+            { name: "Soft Glam", makeup: 55, young: 28, smooth: 48 },
+            { name: "Bright Selfie", makeup: 40, young: 38, smooth: 56 },
+            { name: "Night Glow", makeup: 64, young: 24, smooth: 44 },
+          ],
+    [language]
+  )
   const [imageUri, setImageUri] = useState("")
   const [aiImageUri, setAiImageUri] = useState("")
   const [showAfter, setShowAfter] = useState(true)
@@ -200,8 +220,8 @@ export default function PhotoLabScreen() {
     }
     const msg =
       language === "tr"
-        ? `Womio Photo Studio ile düzenlendi | Makyaj:${makeup}% Genç:${young}% Pürüzsüz:${smooth}%`
-        : `Edited with Womio Photo Studio | Makeup:${makeup}% Young:${young}% Smooth:${smooth}%`
+        ? `Womio Güzellik Stüdyosu ile düzenlendi | Makyaj:${makeup}% Genç:${young}% Pürüzsüz:${smooth}%`
+        : `Edited with Womio Beauty Studio | Makeup:${makeup}% Young:${young}% Smooth:${smooth}%`
     try {
       const editedUri = await captureEditedUri()
       if (!editedUri) throw new Error("capture_failed")
@@ -283,6 +303,30 @@ export default function PhotoLabScreen() {
           <Pressable style={[styles.switchChip, showAfter && styles.switchChipActive]} onPress={() => setShowAfter(true)}>
             <Text style={[styles.switchText, showAfter && styles.switchTextActive]}>{t.after}</Text>
           </Pressable>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>{t.looks}</Text>
+          <View style={styles.presetGrid}>
+            {presets.map((preset) => (
+              <Pressable
+                key={preset.name}
+                style={styles.presetChip}
+                onPress={() => {
+                  setMakeup(preset.makeup)
+                  setYoung(preset.young)
+                  setSmooth(preset.smooth)
+                  setShowAfter(true)
+                  setStatusText(language === "tr" ? `${preset.name} hazır.` : `${preset.name} ready.`)
+                }}
+              >
+                <Text style={styles.presetChipTitle}>{preset.name}</Text>
+                <Text style={styles.presetChipMeta}>
+                  {language === "tr" ? `M ${preset.makeup} • G ${preset.young} • P ${preset.smooth}` : `M ${preset.makeup} • Y ${preset.young} • S ${preset.smooth}`}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
 
         <View style={styles.card}>
